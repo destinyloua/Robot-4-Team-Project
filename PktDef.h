@@ -6,7 +6,18 @@
 
 class PktDef {
 
-	struct Header[
+	struct Header {
+		unsigned short int PktCount : 4; 
+		// command flags? 
+		unsigned short int Length : 4; 
+	} Head;
 
-	]
+	char* Data; 
+	unsigned char CRC; 
+
+public:
+	PktDef(); 
+
+	// need to serialize 
+	
 };
