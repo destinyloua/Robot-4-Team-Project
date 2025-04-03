@@ -15,7 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\Documents\GitHub\Robot-4-Team-Project\PktDef.h">
+    <ClInclude Include="PktDef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CmdType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
