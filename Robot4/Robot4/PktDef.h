@@ -4,6 +4,8 @@
 #include <iostream>
 #include <fstream>
 
+enum CmdType { DRIVE, SLEEP, RESPONSE };
+
 class PktDef {
 
 	struct Header {
@@ -23,7 +25,7 @@ class PktDef {
 public:
 	PktDef();
 	PktDef(char* src);
-	void SetCmd(); // TODO Make a CmdType class (?) then pass it to parameter
+	void SetCmd(CmdType cmd);
 	void SetBodyData(char* cmd, int direction);
 	void SetPckCount(int count);
 
