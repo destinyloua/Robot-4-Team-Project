@@ -21,6 +21,9 @@
   <ItemGroup>
     <ClInclude Include="PktDef.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="PktDef.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
