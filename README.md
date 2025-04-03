@@ -1,1 +1,2 @@
-# robot_4
+# Robot 4: Team Project 
+## Destiny Louangsombath & Tyler Dao 
