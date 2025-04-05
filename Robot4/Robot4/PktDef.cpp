@@ -1,36 +1,46 @@
 #include "PktDef.h"
 #include <iostream>
 #include <bitset>
+#include <cstddef>
+
 using namespace std; 
 
 PktDef::PktDef() {
-    this->Data = new char[3];
-    DIRECTION dir = BACKWARD;
-    // Define an array of values to copy into the memory block
-    char data[3] = { dir, 10, 100 };
-
-    // Use memcpy to copy data into the allocated memory
-    memcpy(this->Data, data, 3);
-
-    cout << "Direction: " << (int)this->Data[0] << std::endl;
-    cout << "Duration: " << (int)this->Data[1] << std::endl;
-    cout << "Speed: " << (int)this->Data[2] << std::endl;
+    memset(&Header, 0, sizeof(Header));
+    memset(&Body, 0, sizeof(Body));
+    CRC = 0;
 }
 
 PktDef::PktDef(char* src) {
+    memcpy(&this->Header, src, sizeof(this->Header));
 
+    // Extract Body (starts after Header)
+    memcpy(&this->Body, src + sizeof(this->Header), sizeof(this->Body));
+
+    memcpy(&this->CRC, src + sizeof(this->Header) + sizeof(this->Body), sizeof(unsigned char));
+
+    CalcCRC();
 } 
 
 void PktDef::SetCmd(CmdType cmd) {
+    if (cmd == DRIVE) {
+        this->Header.Drive = 1;
+        this->Header.Length = 7;
+    }
+    else if (cmd == SLEEP) {
+        this->Header.Sleep = 1;
+        this->Header.Length = 4;
 
+    }
 } 
 
-void PktDef::SetBodyData(char* cmd, int direction) {
-
+void PktDef::SetBodyData(char* data, int direction) {
+    this->Body.Direction = direction;
+    memcpy(&this->Body.Duration, data, 2);
 }
 
 void PktDef::SetPckCount(int count) {
-
+    this->Header.PktCount = count;
 }
 
 CmdType PktDef::GetCmd()
@@ -50,7 +60,9 @@ int PktDef::GetLength()
 
 char* PktDef::GetBodyData()
 {
-	return nullptr;
+    char* body = new char[sizeof(Body)];
+    memcpy(body, &this->Body, sizeof(Body));
+	return body;
 }
 
 int PktDef::GetPktCount()
@@ -65,60 +77,111 @@ bool PktDef::CheckCRC(char* src, int size)
 
 void PktDef::CalcCRC()
 {
+    int count = 0;
+    for (int i = 0; i < 16; i++) {
+        count += 1 & (Header.PktCount >> i);
+    }
+    count += 1 & (Header.Drive);
+    count += 1 & (Header.Status);
+    count += 1 & (Header.Sleep);
+    count += 1 & (Header.Ack);
+    for (int i = 0; i < 4; i++) {
+        count += 1 & (Header.Padding >> i);
+    }
+    count += 1 & (Header.Length);
+
+    for (int i = 0; i < 8; i++) {
+        count += 1 & (Body.Direction >> i);
+    }
+    for (int i = 0; i < 8; i++) {
+        count += 1 & (Body.Duration >> i);
+    }
+    for (int i = 0; i < 8; i++) {
+        count += 1 & (Body.Speed >> i);
+    }
+
+    this->CRC = static_cast<unsigned char>(count);
 }
 
 char* PktDef::GenPacket()
 {
-	return nullptr;
+    size_t size = sizeof(this->Header) + sizeof(this->Body) + sizeof(this->CRC);
+    char* Data = new char[size];
+    memcpy(Data, &this->Header, sizeof(this->Header));
+    memcpy(Data + sizeof(Header), &this->Body, sizeof(Body));
+    memcpy(Data + sizeof(Header) + sizeof(Body), &this->CRC, sizeof(CRC));
+	return Data;
 }
 
 //Testing purpose
-void PrintBits(char value) {
-    // Print all 8 bits of the byte
-    for (int i = 7; i >= 0; --i) {
-        std::cout << ((value >> i) & 1);
+void PktDef::PrintHeader() {
+    char* data;
+    cout << "---------- HEADER ----------" << endl;
+    cout << "PktCount: Decimal: " << this->Header.PktCount << " | Binary: ";
+    for (int i = 15; i >= 0; i--) {
+        cout << (1 & this->Header.PktCount >> i);
     }
-    std::cout << std::endl;
+    cout << endl;
+
+    cout << "Drive: " << " | Binary: ";
+    cout << (1 & this->Header.Drive) << endl;
+
+    cout << "Status: " << " | Binary: ";
+    cout << (1 & this->Header.Status) << endl;
+
+    cout << "Sleep: " << " | Binary: ";
+    cout << (1 & this->Header.Sleep) << endl;
+
+    cout << "ACK: " << " | Binary: ";
+    cout << (1 & this->Header.Ack) << endl;
+
+    cout << "Padding: " << " | Binary: ";
+    for (int i = 3; i >= 0; i--) {
+        cout << (1 & this->Header.Padding >> i);
+    }
+    cout << endl;
+
+    cout << "Length: " << "Decimal: " << this->Header.Length << " | Binary: ";
+    for (int i = 7; i >= 0; i--) {
+        cout << (1 & this->Header.Length >> i);
+    }
+    cout << endl;
+
+    cout << endl;
 }
 
-void PrintBody(char* driveBody) {
-    // Extract and print each byte individually from driveBody (3 bytes)
+void PktDef::PrintBody() {
+    cout << "---------- BODY ----------" << endl;
 
-    // Print Direction (byte 2)
-    char byte = driveBody[0];  // Access the first byte (index 0)
-    cout << "Direction: ";
-    PrintBits(byte);  // Print the bits of this byte
+    cout << "Direction: " << "Decimal: " << this->Body.Direction << " | Binary: ";
+    for (int i = 7; i >= 0; i--) {
+        cout << (1 & this->Body.Direction >> i);
+    }
     cout << endl;
 
-    // Print Duration (byte 1)
-    byte = driveBody[1];  // Access the second byte (index 1)
-    cout << "Duration: ";
-    PrintBits(byte);  // Print the bits of this byte
+    cout << "Duration: " << "Decimal: " << static_cast<int>(this->Body.Duration) << " | Binary: ";
+    for (int i = 7; i >= 0; i--) {
+        cout << (1 & this->Body.Duration >> i);
+    }
     cout << endl;
 
-    // Print Speed (byte 0)
-    byte = driveBody[2];  // Access the third byte (index 2)
-    cout << "Speed: ";
-    PrintBits(byte);  // Print the bits of this byte
+    cout << "Speed: " << "Decimal: " << static_cast<int>(this->Body.Speed) << " | Binary: ";
+    for (int i = 7; i >= 0; i--) {
+        cout << (1 & this->Body.Speed>> i);
+    }
+    cout << endl;
+
     cout << endl;
 }
 
 void PktDef::PrintPkt()
 {
-    // Print results
-    cout << "-----HEADER-----" << endl;
-    cout << "Packet Count: " << std::bitset<16>(Head.PktCount) << " Dec: " << Head.PktCount << endl << endl;
-    cout << "Drive: " << std::bitset<1>(Head.Drive) << " Dec: " << Head.Drive<< endl << endl;
-    cout << "Status: " << std::bitset<1>(Head.Status) << " Dec: " << Head.Status << endl << endl;
-    cout << "Sleep: " << std::bitset<1>(Head.Sleep) << " Dec: " << Head.Sleep << endl << endl;
-    cout << "Ack: " << std::bitset<1>(Head.Ack) << " Dec: " << Head.Ack << endl << endl;
-    cout << "Padding: " << std::bitset<4>(Head.Padding) << " Dec: " << Head.Padding << endl << endl;
-    cout << "Length: " << std::bitset<8>(Head.Length) << " Dec: " << Head.Length << endl << endl;
-
-    cout << "-----BODY-----" << endl;
-    PrintBody(Data);
-
-    cout << "-----TAIL-----" << endl;
-    // Print CRC in decimal and binary
-    cout << "CRC: " << std::bitset<8>(CRC) << static_cast<int>(CRC) << endl;
+    PrintHeader();
+    PrintBody();
+    
+    cout << "CRC: " << "Decimal: " << static_cast<int>(this->CRC) << " | Binary: ";
+    for (int i = 7; i >= 0; i--) {
+        cout << (1 & this->CRC >> i);
+    }
+    cout << endl;
 }

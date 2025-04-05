@@ -10,16 +10,20 @@ enum DIRECTION { FORWARD = 1, BACKWARD, LEFT, RIGHT };
 class PktDef {
 
 	struct Header {
-		unsigned short int PktCount : 16;
+		unsigned short int PktCount;
 		unsigned short int Drive : 1;
 		unsigned short int Status : 1;
 		unsigned short int Sleep : 1;
 		unsigned short int Ack : 1;
 		unsigned short int Padding : 4;
 		unsigned short int Length : 8;
-	} Head;
+	} Header;
 
-	char* Data;
+	struct Body {
+		unsigned short int Direction : 8;
+		unsigned char Duration;
+		unsigned char Speed;
+	} Body;
 	unsigned char CRC;
 
 public:
@@ -38,5 +42,7 @@ public:
 	char* GenPacket();
 
 	//For Testing purpose
+	void PrintHeader();
+	void PrintBody();
 	void PrintPkt();
 };
