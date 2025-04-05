@@ -13,12 +13,14 @@ PktDef::PktDef() {
 
 PktDef::PktDef(char* src) {
     memcpy(&this->Header, src, sizeof(this->Header));
-
-    // Extract Body (starts after Header)
-    memcpy(&this->Body, src + sizeof(this->Header), sizeof(this->Body));
-
-    memcpy(&this->CRC, src + sizeof(this->Header) + sizeof(this->Body), sizeof(unsigned char));
-
+    if(Header.Length > 7){
+        memcpy(&this->Body, src + sizeof(this->Header), sizeof(this->Body));
+        memcpy(&this->CRC, src + sizeof(this->Header) + sizeof(this->Body), sizeof(unsigned char));
+    }
+    else {
+        memcpy(&this->CRC, src + sizeof(this->Header), sizeof(unsigned char));
+    }
+    
     CalcCRC();
 } 
 
@@ -34,9 +36,11 @@ void PktDef::SetCmd(CmdType cmd) {
     }
 } 
 
-void PktDef::SetBodyData(char* data, int direction) {
-    this->Body.Direction = direction;
-    memcpy(&this->Body.Duration, data, 2);
+void PktDef::SetBodyData(char* bodyData, int size) {
+    if(size>0){
+        memcpy(&this->Body, bodyData, size);
+        CalcCRC();
+    }
 }
 
 void PktDef::SetPckCount(int count) {
@@ -62,6 +66,7 @@ char* PktDef::GetBodyData()
 {
     char* body = new char[sizeof(Body)];
     memcpy(body, &this->Body, sizeof(Body));
+    CalcCRC();
 	return body;
 }
 
@@ -88,7 +93,10 @@ void PktDef::CalcCRC()
     for (int i = 0; i < 4; i++) {
         count += 1 & (Header.Padding >> i);
     }
-    count += 1 & (Header.Length);
+
+    for (int i = 0; i < 8; i++) {
+        count += 1 & (Header.Length >> i);
+    }
 
     for (int i = 0; i < 8; i++) {
         count += 1 & (Body.Direction >> i);
@@ -105,10 +113,12 @@ void PktDef::CalcCRC()
 
 char* PktDef::GenPacket()
 {
-    size_t size = sizeof(this->Header) + sizeof(this->Body) + sizeof(this->CRC);
+    size_t size = sizeof(Header) + sizeof(Body) + sizeof(CRC);
     char* Data = new char[size];
-    memcpy(Data, &this->Header, sizeof(this->Header));
+    this->Header.Length = size;
+    memcpy(Data, &this->Header, sizeof(Header));
     memcpy(Data + sizeof(Header), &this->Body, sizeof(Body));
+    CalcCRC();
     memcpy(Data + sizeof(Header) + sizeof(Body), &this->CRC, sizeof(CRC));
 	return Data;
 }
@@ -177,7 +187,9 @@ void PktDef::PrintBody() {
 void PktDef::PrintPkt()
 {
     PrintHeader();
-    PrintBody();
+	if (Header.Length > 7){
+        PrintBody();
+    }
     
     cout << "CRC: " << "Decimal: " << static_cast<int>(this->CRC) << " | Binary: ";
     for (int i = 7; i >= 0; i--) {

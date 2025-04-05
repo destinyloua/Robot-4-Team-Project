@@ -20,7 +20,7 @@ class PktDef {
 	} Header;
 
 	struct Body {
-		unsigned short int Direction : 8;
+		unsigned char Direction;
 		unsigned char Duration;
 		unsigned char Speed;
 	} Body;
@@ -30,7 +30,7 @@ public:
 	PktDef();
 	PktDef(char* src);
 	void SetCmd(CmdType cmd);
-	void SetBodyData(char* cmd, int direction);
+	void SetBodyData(char* bodyData, int size);
 	void SetPckCount(int count);
 	CmdType GetCmd();
 	bool GetAck();
