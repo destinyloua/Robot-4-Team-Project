@@ -9,16 +9,10 @@ using namespace std;
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
-// Link with Ws2_32.lib
 #pragma comment(lib, "Ws2_32.lib")
 
-// Function to send a PktDef packet over UDP to the robot.
 char* sendPacketToRobot(PktDef pkt) {
-    // Generate the raw packet data from the PktDef object.
-    // Calculate the packet size: assume it's Header + Body + CRC.
-    char* data = new char[sizeof(pkt)];
-    data = pkt.GenPacket();
-    // Initialize Winsock.
+    char* data = pkt.GenPacket();
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
     if (iResult != 0) {
@@ -27,7 +21,6 @@ char* sendPacketToRobot(PktDef pkt) {
         return nullptr;
     }
 
-    // Create a UDP socket.
     SOCKET sendSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (sendSocket == INVALID_SOCKET) {
         std::cerr << "Socket creation failed: " << WSAGetLastError() << std::endl;
@@ -36,7 +29,6 @@ char* sendPacketToRobot(PktDef pkt) {
         return nullptr;
     }
 
-    // Set up the destination address (robot's IP and port).
     sockaddr_in destAddr;
     destAddr.sin_family = AF_INET;
     destAddr.sin_port = htons(5000);
@@ -48,8 +40,8 @@ char* sendPacketToRobot(PktDef pkt) {
         return nullptr;
     }
 
-    // Send the packet.
-    int bytesSent = sendto(sendSocket, data, sizeof(pkt), 0,
+    int pktSize = pkt.GetLength();
+    int bytesSent = sendto(sendSocket, data, pktSize, 0,
         reinterpret_cast<sockaddr*>(&destAddr), sizeof(destAddr));
     if (bytesSent == SOCKET_ERROR) {
         std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
@@ -69,64 +61,36 @@ char* sendPacketToRobot(PktDef pkt) {
     if (received == SOCKET_ERROR) {
         std::cerr << "recvfrom failed. Error: " << WSAGetLastError() << std::endl;
     }
-    // Clean up.
+
     closesocket(sendSocket);
     WSACleanup();
-    delete[] data;  // Option 1: Caller is responsible for freeing the memory allocated in GenPacket().
+    delete[] data;
     return RxBuffer;
 }
 
 
 int main() {
-    int pktCounter = 0;
-    while (true) {
-        char* data = new char[3];
-        int direction;
-        int option;
-        cout << "1. Forward" << endl << "2. Backward" << endl << "3. Right" << endl << "4. Left" << endl;
-        cout << "Select direction: ";
-        cin >> option;
-        switch (option)
-        {
-        case 1:
-            direction = FORWARD;
-            break;
-        case 2:
-            direction = BACKWARD;
-            break;
-        case 3:
-            direction = RIGHT;
-            break;
-        case 4:
-            direction = LEFT;
-            break;
-        default:
-            direction = 0;
-            break;
-        }
-        cout << "Select duration (second): ";
-        int duration;
-        cin >> duration;
-        
-        cout << "Select speed (80-100): ";
-        int speed;
-        cin >> speed;
+    //Create PKT
+    PktDef pkt;
+    pkt.SetPckCount(1);
+    pkt.SetCmd(DRIVE);
 
-        data[0] = direction;
-        data[1] = duration;
-        data[2] = speed;
+    char* data = new char[3];
+    data[0] = static_cast<char>(FORWARD);
+    data[1] = static_cast<char>(10);
+    data[2] = static_cast<char>(80);
+    pkt.SetBodyData(data, 3);
+    delete[] data;
+    pkt.PrintPkt();
 
-        PktDef pkt;
-        pktCounter++;
-        pkt.SetPckCount(pktCounter);
-        pkt.SetCmd(DRIVE);
-        pkt.SetBodyData(data, 3);
-        delete[] data;
-        //pkt.PrintPkt();
-        data = sendPacketToRobot(pkt);
+    char* RxBuffer = sendPacketToRobot(pkt);
 
-        PktDef rec(data);
-        rec.PrintPkt();
-    }
+    char* pktData = pkt.GenPacket();
+
+    cout << endl;
+
+    PktDef pkt2(RxBuffer);
+    delete[] pktData;
+    pkt2.PrintPkt();
 	return 1;
 }
