@@ -5,7 +5,6 @@ using namespace std;
 
 
 int main() {
-
     int pktCounter = 0;
     while (true) {
         char* data = new char[3];
