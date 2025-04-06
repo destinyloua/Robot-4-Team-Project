@@ -195,4 +195,15 @@ void PktDef::PrintPkt()
         cout << (1 & this->CRC >> i);
     }
     cout << endl;
+
+    size_t totalSize = sizeof(Header) + sizeof(Body) + sizeof(CRC);
+
+    char* RawBuffer = GenPacket();
+
+    std::cout << "---------- RAW BUFFER ----------" << std::endl;
+    for (size_t i = 0; i < totalSize; i++) {
+        unsigned char byte = static_cast<unsigned char>(RawBuffer[i]);
+        cout << bitset<8>(byte) << " " ;
+    }
+    cout << endl;
 }
