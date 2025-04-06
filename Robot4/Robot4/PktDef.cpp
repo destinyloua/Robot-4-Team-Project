@@ -125,7 +125,6 @@ char* PktDef::GenPacket()
 
 //Testing purpose
 void PktDef::PrintHeader() {
-    char* data;
     cout << "---------- HEADER ----------" << endl;
     cout << "PktCount: Decimal: " << this->Header.PktCount << " | Binary: ";
     for (int i = 15; i >= 0; i--) {
