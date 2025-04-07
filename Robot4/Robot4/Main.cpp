@@ -11,7 +11,7 @@ using namespace std;
 
 #pragma comment(lib, "Ws2_32.lib")
 
-char* sendPacketToRobot(PktDef pkt) {
+PktDef sendPacketToRobot(PktDef pkt) {
     char* data = pkt.GenPacket();
     WSADATA wsaData;
     int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
@@ -58,14 +58,42 @@ char* sendPacketToRobot(PktDef pkt) {
     char* RxBuffer = new char[1024];
     int len = sizeof(struct sockaddr_in);
     int received = recvfrom(sendSocket, RxBuffer, 1024, 0, reinterpret_cast<sockaddr*>(&fromAddr), &fromAddrLen);
+    std::cout << received << " bytes received" << std::endl;
     if (received == SOCKET_ERROR) {
         std::cerr << "recvfrom failed. Error: " << WSAGetLastError() << std::endl;
+        closesocket(sendSocket);
+        WSACleanup();
+        delete[] data;
+        return NULL;
     }
+
+    PktDef res(RxBuffer);
+    //TODO Figure it out the telemetry response
+    //if (res.GetCmd() == RESPONSE) {
+    //    delete[] RxBuffer;
+    //    RxBuffer = new char[1024];
+    //    len = sizeof(struct sockaddr_in);
+    //    int received = recvfrom(sendSocket, RxBuffer, 1024, 0, reinterpret_cast<sockaddr*>(&fromAddr), &fromAddrLen);
+    //    if (received == SOCKET_ERROR) {
+    //        std::cerr << "recvfrom failed. Error: " << WSAGetLastError() << std::endl;
+    //        closesocket(sendSocket);
+    //        WSACleanup();
+    //        delete[] data;
+    //        delete[] RxBuffer;
+    //        return NULL;
+    //    }
+    //    std::cout << received << " bytes received" << std::endl;
+    //    PktDef telemetryPkt(RxBuffer);
+    //    closesocket(sendSocket);
+    //    WSACleanup();
+    //    delete[] data;
+    //    return telemetryPkt;
+    //}
 
     closesocket(sendSocket);
     WSACleanup();
     delete[] data;
-    return RxBuffer;
+    return res;
 }
 
 
@@ -73,23 +101,24 @@ int main() {
     //Create PKT
     PktDef pkt;
     pkt.SetPckCount(1);
-    pkt.SetCmd(DRIVE);
+    //pkt.SetCmd(DRIVE);
 
-    char* data = new char[3];
-    data[0] = static_cast<char>(FORWARD);
-    data[1] = static_cast<char>(10);
-    data[2] = static_cast<char>(80);
-    pkt.SetBodyData(data, 3);
-    delete[] data;
+    //char* data = new char[3];
+    //data[0] = static_cast<char>(FORWARD);
+    //data[1] = static_cast<char>(10);
+    //data[2] = static_cast<char>(80);
+    //pkt.SetBodyData(data, 3);
+    //delete[] data;
+
+    pkt.SetCmd(RESPONSE);
     pkt.PrintPkt();
-
-    char* RxBuffer = sendPacketToRobot(pkt);
+    //char* RxBuffer = sendPacketToRobot(pkt);
 
     char* pktData = pkt.GenPacket();
 
     cout << endl;
 
-    PktDef pkt2(RxBuffer);
+    PktDef pkt2 = sendPacketToRobot(pkt);
     delete[] pktData;
     pkt2.PrintPkt();
 	return 1;
