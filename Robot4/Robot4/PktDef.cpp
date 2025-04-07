@@ -18,7 +18,7 @@ PktDef::PktDef() {
 PktDef::PktDef(char* src) {
     this->RawBuffer = nullptr;
     memcpy(&CmdPkt.header, src, sizeof(HEADER));
-    if(CmdPkt.header.Length >5){
+    if(CmdPkt.header.Drive == 1){
         CmdPkt.data = new char[sizeof(DRIVEBODY)];
         memcpy(CmdPkt.data, src + sizeof(HEADER), sizeof(DRIVEBODY));
         memcpy(&CmdPkt.CRC, src + sizeof(HEADER) + sizeof(DRIVEBODY), sizeof(CmdPkt.CRC));
@@ -392,32 +392,32 @@ void PktDef::PrintBody() {
         TELEMETRY body;
         memcpy(&body, CmdPkt.data, sizeof(TELEMETRY));
         cout << "---------- TELEMETRY BODY ----------" << endl;
-        cout << "Current Grade: " << static_cast<int>(body.CurrentGrade) << endl;
+        cout << "Last Pkt Counter: " << static_cast<int>(body.LastPktCounter) << endl;
         byte = static_cast<unsigned char>(CmdPkt.data[0]);
         cout << std::bitset<16>(byte) << endl;
 
-        cout << "Hit Sount: " << static_cast<int>(body.HitCount) << endl;
-        byte = static_cast<unsigned char>(CmdPkt.data[1]);
+        cout << "Current Grade: " << static_cast<int>(body.CurrentGrade) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        cout << std::bitset<16>(byte) << endl;
+
+        cout << "Hit Count: " << static_cast<int>(body.HitCount) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[4]);
         cout << std::bitset<16>(byte) << endl;
 
         cout << "Last Cmd: " << static_cast<int>(body.LastCmd) << endl;
-        byte = static_cast<unsigned char>(CmdPkt.data[2]);
-        cout << std::bitset<16>(byte) << endl;
-
-        cout << "Last Cmd Speed: " << static_cast<int>(body.LastCmdSpeed) << endl;
-        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        byte = static_cast<unsigned char>(CmdPkt.data[6]);
         cout << std::bitset<8>(byte) << endl;
 
         cout << "Last Cmd Value: " << static_cast<int>(body.LastCmdValue) << endl;
-        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        byte = static_cast<unsigned char>(CmdPkt.data[7]);
         cout << std::bitset<8>(byte) << endl;
 
-        cout << "Last Pkt Counter: " << static_cast<int>(body.LastPktCounter) << endl;
-        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        cout << "Last Cmd Speed: " << static_cast<int>(body.LastCmdSpeed) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[8]);
         cout << std::bitset<8>(byte) << endl;
 
         cout << "*Data: ";
-        for (int i = 0; i < sizeof(TELEMETRY); i++) {
+        for (int i =0; i < sizeof(TELEMETRY); i++) {
             byte = static_cast<unsigned char>(CmdPkt.data[i]);
             cout << std::bitset<8>(byte) << " ";
         }
@@ -468,9 +468,7 @@ void PktDef::PrintPkt()
     char* data = GenPacket();
 
     cout << "---------- RAW BUFFER ----------" << endl;
-    unsigned char byte = static_cast<unsigned char>(data[0]);
-    cout << bitset<16>(byte) << " ";
-    for (size_t i = 1; i < totalSize; i++) {
+    for (size_t i = 0; i < totalSize; i++) {
         unsigned char byte = static_cast<unsigned char>(data[i]);
         cout << bitset<8>(byte) << " ";
     }
