@@ -2,7 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.dll</FullPath>
+      <FullPath>C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\x64\Debug\Robot4.exe</FullPath>
+    </ProjectOutput>
+    <ProjectOutput>
+      <FullPath>C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.dll</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

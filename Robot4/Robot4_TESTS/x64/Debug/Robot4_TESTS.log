@@ -1,6 +1,2 @@
-﻿  pch.cpp
-  Robot4_TESTS.cpp
-     Creating library C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.lib and object C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.exp
-  Robot4_TESTS.vcxproj -> C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.dll
-  'pwsh.exe' is not recognized as an internal or external command,
-  operable program or batch file.
+﻿  Robot4_TESTS.cpp
+  Robot4_TESTS.vcxproj -> C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TESTS.dll

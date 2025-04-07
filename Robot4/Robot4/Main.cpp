@@ -72,7 +72,7 @@ char* sendPacketToRobot(PktDef pkt) {
 int main() {
     //Create PKT
     PktDef pkt;
-    pkt.SetPckCount(1);
+    pkt.SetPktCount(1);
     pkt.SetCmd(DRIVE);
 
     char* data = new char[3];
@@ -92,5 +92,6 @@ int main() {
     PktDef pkt2(RxBuffer);
     delete[] pktData;
     pkt2.PrintPkt();
+
 	return 1;
 }
