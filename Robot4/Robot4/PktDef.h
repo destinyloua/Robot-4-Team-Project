@@ -6,16 +6,19 @@
 
 enum CmdType { DRIVE, SLEEP, RESPONSE };
 enum DIRECTION { FORWARD = 1, BACKWARD, LEFT, RIGHT };
+const int HEADERSIZE = 4; 
+// Calculation: 2 bytes + [1 bit + 1 bit + 1 bit + 1 bit + 4 bits]  + 1 byte 
+// HEADERSIZE = 2 + 1 + 1 = 4 bytes 
 
 #pragma pack(push, 1)
 typedef struct Header {
-	unsigned short int PktCount;
-	unsigned short int Drive : 1;
-	unsigned short int Status : 1;
-	unsigned short int Sleep : 1;
-	unsigned short int Ack : 1;
-	unsigned short int Padding : 4;
-	unsigned short int Length : 8;
+	unsigned short int PktCount;		// 2 bytes
+	unsigned short int Drive : 1;		// 1 bit
+	unsigned short int Status : 1;		// 1 bit
+	unsigned short int Sleep : 1;		// 1 bit
+	unsigned short int Ack : 1;			// 1 bit
+	unsigned short int Padding : 4;		// 4 bits
+	unsigned short int Length : 8;		// 1 byte
 } HEADER;
 
 typedef struct DriveBody {
@@ -50,7 +53,7 @@ public:
 	~PktDef();
 	void SetCmd(CmdType cmd);
 	void SetBodyData(char* bodyData, int size);
-	void SetPckCount(int count);
+	void SetPktCount(int count);
 	CmdType GetCmd();
 	bool GetAck();
 	int GetLength();
@@ -59,6 +62,17 @@ public:
 	bool CheckCRC(char* src, int size);
 	void CalcCRC();
 	char* GenPacket();
+
+	// Additional methods
+	void SetAck(int value); 
+	unsigned char GetCRC();
+
+	//For Testing purpose
+	char* GetRawBuffer(); 
+	bool IsHeaderAllZero(); 
+	bool IsDriveBodyNull(); 
+	int CRCCount(); 
+	
 
 	//For Debugging purpose
 	void PrintHeader();
