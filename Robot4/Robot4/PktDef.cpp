@@ -5,6 +5,7 @@
 
 using namespace std; 
 
+// packet default constructor
 PktDef::PktDef() {
     this->RawBuffer = nullptr;
     this->CmdPkt.data = nullptr;
@@ -13,6 +14,7 @@ PktDef::PktDef() {
 
 }
 
+// packet constructor with raw data buffer 
 PktDef::PktDef(char* src) {
     this->RawBuffer = nullptr;
     memcpy(&CmdPkt.header, src, sizeof(HEADER));
@@ -25,11 +27,13 @@ PktDef::PktDef(char* src) {
         memcpy(&CmdPkt.CRC, src + sizeof(HEADER), sizeof(CmdPkt.CRC));
     }
 }
+
+// packet destructor 
 PktDef::~PktDef()
-{
+{ 
 }
 
-
+// for setting command flag
 void PktDef::SetCmd(CmdType cmd) {
     if (cmd == DRIVE) {
         this->CmdPkt.header.Drive = 1;
@@ -39,6 +43,7 @@ void PktDef::SetCmd(CmdType cmd) {
     }
 } 
 
+// for setting body data from a raw buffer 
 void PktDef::SetBodyData(char* bodyData, int size) {
     if(size>0){
         CmdPkt.data = new char[size];
@@ -48,25 +53,30 @@ void PktDef::SetBodyData(char* bodyData, int size) {
     }
 }
 
-void PktDef::SetPckCount(int count) {
+// for setting the packet count 
+void PktDef::SetPktCount(int count) {
     this->CmdPkt.header.PktCount = count;
 }
 
+// returns the type of command as enum 
 CmdType PktDef::GetCmd()
 {
 	return CmdType();
 }
 
+// returns acknowlegement - true if flag set
 bool PktDef::GetAck()
 {
-	return false;
+	return CmdPkt.header.Ack == 1;
 }
 
+// returns length of data 
 int PktDef::GetLength()
 {
     return CmdPkt.header.Length;
 }
 
+// returns the drive body as a raw buffer 
 char* PktDef::GetBodyData()
 {
     char* data = new char[sizeof(DRIVEBODY)];
@@ -74,14 +84,35 @@ char* PktDef::GetBodyData()
     return data;
 }
 
+// returns the packet count
 int PktDef::GetPktCount()
 {
-	return 0;
+	return CmdPkt.header.PktCount;
 }
 
+// compares src crc and actual crc to see if they match 
 bool PktDef::CheckCRC(char* src, int size)
 {
-	return false;
+    // check for empty source buffer 
+    if (size <= 0) {
+        return false; 
+    }
+    
+    int count = 0; 
+
+    //  recount CRC from the buffer 
+    for (int i = 0; i < size - 1; ++i) {        // don't count the crc byte 
+        unsigned char byte = static_cast<unsigned char>(src[i]); 
+        for (int j = 0; j < 8; ++j) {
+            count += (byte >> j) & 1; 
+        }
+    }
+
+    // compare manually calculated crc vs. received crc
+    unsigned char calculated = static_cast<unsigned char>(count); 
+    unsigned char received = static_cast<unsigned char>(src[size - 1]); // holds the value of the packet's CRC 
+
+	return calculated == received;
 }
 
 void PktDef::CalcCRC()
@@ -139,6 +170,7 @@ void PktDef::CalcCRC()
     this->CRC = static_cast<unsigned char>(count);*/
 }
 
+// generates a packet (serialize) 
 char* PktDef::GenPacket()
 {
     int size = sizeof(CmdPkt);
@@ -153,6 +185,77 @@ char* PktDef::GenPacket()
     memcpy(RawBuffer +sizeof(HEADER) + sizeof(DRIVEBODY), &CmdPkt.CRC, sizeof(CmdPkt.CRC));
     return RawBuffer;
 }
+
+// ADDITIONAL METHODS ADDED 
+// 
+// manually sets ack flag 
+void PktDef::SetAck(int value)
+{
+    CmdPkt.header.Ack = value; 
+}
+
+// returns sthe CRC
+unsigned char PktDef::GetCRC()
+{
+    return CmdPkt.CRC;
+}
+
+// returns the raw buffer 
+char* PktDef::GetRawBuffer()
+{
+    return RawBuffer;
+}
+
+
+// METHODS FOR TESTING/DEBUGGING 
+// 
+// checks if all values in the header are in a safe state 
+bool PktDef::IsHeaderAllZero()
+{
+    if (CmdPkt.header.Ack == 0 &&
+        CmdPkt.header.Drive == 0 &&
+        CmdPkt.header.Length == 0 &&
+        CmdPkt.header.Padding == 0 &&
+        CmdPkt.header.PktCount == 0 &&
+        CmdPkt.header.Sleep == 0 &&
+        CmdPkt.header.Status == 0) {
+        return true; 
+    }
+    return false;
+}
+
+// checks if the drive body is null 
+bool PktDef::IsDriveBodyNull()
+{
+    if (CmdPkt.data == nullptr) {
+        return true; 
+    }
+    return false;
+}
+
+// alternate method for counting CRC for testing 
+int PktDef::CRCCount()
+{
+    int count = 0; 
+
+    // use bitset to count bits in each field this time 
+    count += std::bitset<16>(CmdPkt.header.PktCount).count();
+    count += std::bitset<1>(CmdPkt.header.Drive).count();
+    count += std::bitset<1>(CmdPkt.header.Status).count();
+    count += std::bitset<1>(CmdPkt.header.Sleep).count();
+    count += std::bitset<1>(CmdPkt.header.Ack).count();
+    count += std::bitset<4>(CmdPkt.header.Padding).count();
+    count += std::bitset<8>(CmdPkt.header.Length).count();
+
+    // count body bits only if header length > HEADERSIZE
+    if (CmdPkt.header.Length > HEADERSIZE) {
+        for (int i = 0; i < 3; i++) {
+            count += std::bitset<8>(CmdPkt.data[i]).count();
+        }
+    }
+    return count;
+}
+
 
 //Debugging purpose
 void PktDef::PrintHeader() {
