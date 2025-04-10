@@ -85,6 +85,85 @@ char* sendPacketToRobot(PktDef pkt) {
     return RxBuffer;
 }
 
+char* sendPacketToRobotTCP(PktDef pkt) {
+    char* data = pkt.GenPacket();
+    WSADATA wsaData;
+    int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+    if (iResult != 0) {
+        std::cerr << "WSAStartup failed: " << iResult << std::endl;
+        delete[] data;
+        return nullptr;
+    }
+
+    SOCKET tcpSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (tcpSocket == INVALID_SOCKET) {
+        std::cerr << "Socket creation failed: " << WSAGetLastError() << std::endl;
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    sockaddr_in serverAddr;
+    serverAddr.sin_family = AF_INET;
+    serverAddr.sin_port = htons(5000);
+    if (inet_pton(AF_INET, "127.0.0.1", &serverAddr.sin_addr) <= 0) {
+        std::cerr << "Invalid IP address" << std::endl;
+        closesocket(tcpSocket);
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    if (connect(tcpSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+        std::cerr << "Connect failed: " << WSAGetLastError() << std::endl;
+        closesocket(tcpSocket);
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    int pktSize = pkt.GetLength();
+    int bytesSent = send(tcpSocket, data, pktSize, 0);
+    if (bytesSent == SOCKET_ERROR) {
+        std::cerr << "Send failed: " << WSAGetLastError() << std::endl;
+        closesocket(tcpSocket);
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    std::cout << "Sent " << bytesSent << " bytes to 127.0.0.1:5000 (TCP)" << std::endl;
+
+    char* RxBuffer = new char[1024];
+    int received = recv(tcpSocket, RxBuffer, 1024, 0);
+    std::cout << received << " bytes received" << std::endl;
+    if (received == SOCKET_ERROR) {
+        std::cerr << "recv failed. Error: " << WSAGetLastError() << std::endl;
+        closesocket(tcpSocket);
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    if (pkt.GetCmd() == RESPONSE) {
+        received = recv(tcpSocket, RxBuffer, 1024, 0);
+        std::cout << received << " bytes for telemetry received" << std::endl;
+        if (received == SOCKET_ERROR) {
+            std::cerr << "recv failed. Error: " << WSAGetLastError() << std::endl;
+            closesocket(tcpSocket);
+            WSACleanup();
+            delete[] data;
+            return nullptr;
+        }
+    }
+
+    closesocket(tcpSocket);
+    WSACleanup();
+    delete[] data;
+    return RxBuffer;  // Caller is responsible for deleting this
+}
+
+
 
 int main() {
     //Create PKT
@@ -105,7 +184,7 @@ int main() {
     char* pktData = pkt.GenPacket();
 
     cout << endl;
-    char* data = sendPacketToRobot(pkt);
+    char* data = sendPacketToRobotTCP(pkt);
 
     PktDef pkt2(data);
     delete[] pktData, data;
