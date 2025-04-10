@@ -2,7 +2,9 @@
 #include <string>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#pragma comment(lib, "ws2_32.lib") // Link with Winsock library
 using namespace std;
+
 
 const int DEFAULT_SIZE = 1024;
 
@@ -25,12 +27,13 @@ class MySocket
 
 public:
 	MySocket();
+	//Done
 	MySocket(SocketType socketType, string ipAddress, unsigned int port, ConnectionType connectionType, unsigned int bufferSize);
 	~MySocket();
 
 	void ConnectTCP();
 	void DisconnectTCP();
-	void SendData(const char* data, int size);
+	void SendData(const char* data, int size); //Done
 	int GetData(char* RxBuffer);
 	string GetIPAddr();
 	void SetIPAddre(string ip);
