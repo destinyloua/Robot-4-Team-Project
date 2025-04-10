@@ -1,0 +1,63 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Robot Control Panel</title>
+    <link rel="stylesheet" href="/styles/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Robot Control Panel</h1>
+
+        <!-- Command Section -->
+        <section class="commands">
+            <h2>Commands</h2>
+            <div class="command-buttons">
+                <button class="command-btn" id="sleepBtn" onclick="selectCommand('sleep')">Sleep</button>
+                <button class="command-btn" id="driveBtn" onclick="selectCommand('drive')">Drive</button>
+            </div>
+        </section>
+
+        <!-- Direction Section -->
+        <section class="directions">
+            <h2>Directions</h2>
+            <div class="direction-buttons">
+                <button class="direction-btn" id="forwardBtn" onclick="selectDirection('forward')" disabled>Forward</button>
+                <button class="direction-btn" id="backwardBtn" onclick="selectDirection('backward')" disabled>Backward</button>
+                <button class="direction-btn" id="leftBtn" onclick="selectDirection('left')" disabled>Left</button>
+                <button class="direction-btn" id="rightBtn" onclick="selectDirection('right')" disabled>Right</button>
+            </div>
+        </section>
+
+        <!-- Settings Section -->
+        <section class="settings">
+            <h2>Settings</h2>
+            <label for="duration">Duration (sec):</label>
+            <input type="number" id="duration" placeholder="e.g. 5" disabled />
+
+            <label for="speed">Speed:</label>
+            <input type="number" id="speed" placeholder="e.g. 10" disabled />
+        </section>
+
+        <!-- GO Button -->
+        <section class="go-button">
+            <button id="goBtn" onclick="executeCommand()">GO</button>
+        </section>
+
+        <!-- Robot Response Panel -->
+        <section class="response-panel">
+            <h2>Robot Response</h2>
+            <div id="responseDisplay">Awaiting robot response...</div>
+        </section>
+
+        <!-- Telemetry Response Panel -->
+        <section class="telemetry-panel">
+            <h2>Telemetry Response</h2>
+            <div id="telemetryDisplay">Telemetry data will appear here...</div>
+        </section>
+    </div>
+
+    <script src="/scripts/functions.js"></script>
+</body>
+</html>
