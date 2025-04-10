@@ -57,12 +57,16 @@ int main()
 
 	// for connecting  
 	CROW_ROUTE(app, "/connect").methods(HTTPMethod::Post)
-		([](const request& req, response& res, string ipAddress, int port) {
+		([](const request& req, response& res) {
 		
-		// connect to localhost 
-		const string ipAddress = "127.0.0.1";
-		const int port = 23500; 
-
+			string ipAddress = "127.0.0.1";
+			const int port = 23500;
+			
+			// TODO: logic to connect goes here
+	
+			res.code = 200;
+			res.write("Connected to robot at 127.0.0.1:23500");
+			res.end();
 		});
 
 	// for sending robot drive/sleep command
