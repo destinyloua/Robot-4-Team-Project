@@ -56,10 +56,27 @@ char* sendPacketToRobot(PktDef pkt) {
     sockaddr_in fromAddr;
     int fromAddrLen = sizeof(fromAddr);
     char* RxBuffer = new char[1024];
-    int len = sizeof(struct sockaddr_in);
+
     int received = recvfrom(sendSocket, RxBuffer, 1024, 0, reinterpret_cast<sockaddr*>(&fromAddr), &fromAddrLen);
+    std::cout << received << " bytes received" << std::endl;
     if (received == SOCKET_ERROR) {
         std::cerr << "recvfrom failed. Error: " << WSAGetLastError() << std::endl;
+        closesocket(sendSocket);
+        WSACleanup();
+        delete[] data;
+        return nullptr;
+    }
+
+    if (pkt.GetCmd() == RESPONSE) {
+        received = recvfrom(sendSocket, RxBuffer, 1024, 0, reinterpret_cast<sockaddr*>(&fromAddr), &fromAddrLen);
+        std::cout << received << " bytes for telemetry received" << std::endl;
+        if (received == SOCKET_ERROR) {
+            std::cerr << "recvfrom failed. Error: " << WSAGetLastError() << std::endl;
+            closesocket(sendSocket);
+            WSACleanup();
+            delete[] data;
+            return nullptr;
+        }
     }
 
     closesocket(sendSocket);
@@ -73,24 +90,25 @@ int main() {
     //Create PKT
     PktDef pkt;
     pkt.SetPktCount(1);
-    pkt.SetCmd(DRIVE);
+    pkt.SetCmd(RESPONSE);
 
-    char* data = new char[3];
-    data[0] = static_cast<char>(FORWARD);
-    data[1] = static_cast<char>(10);
-    data[2] = static_cast<char>(80);
-    pkt.SetBodyData(data, 3);
-    delete[] data;
+    //char* body = new char[3];
+    //body[0] = static_cast<char>(FORWARD);
+    //body[1] = static_cast<char>(10);
+    //body[2] = static_cast<char>(80);
+    //pkt.SetBodyData(body, 3);
+    //delete[] body;
+
     pkt.PrintPkt();
-
-    char* RxBuffer = sendPacketToRobot(pkt);
+    //char* RxBuffer = sendPacketToRobot(pkt);
 
     char* pktData = pkt.GenPacket();
 
     cout << endl;
+    char* data = sendPacketToRobot(pkt);
 
-    PktDef pkt2(RxBuffer);
-    delete[] pktData;
+    PktDef pkt2(data);
+    delete[] pktData, data;
     pkt2.PrintPkt();
 
 	return 1;

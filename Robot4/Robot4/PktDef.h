@@ -26,6 +26,15 @@ typedef struct DriveBody {
 	unsigned char Duration;
 	unsigned char Speed;
 } DRIVEBODY;
+
+typedef struct Telemetry {
+	unsigned short int LastPktCounter;
+	unsigned short int CurrentGrade;
+	unsigned short int HitCount;
+	unsigned char LastCmd;
+	unsigned char LastCmdValue;
+	unsigned char LastCmdSpeed;
+}TELEMETRY;
 #pragma pack(pop)
 
 class PktDef {
@@ -65,6 +74,7 @@ public:
 	int CRCCount(); 
 	
 
+	//For Debugging purpose
 	void PrintHeader();
 	void PrintBody();
 	void PrintPkt();

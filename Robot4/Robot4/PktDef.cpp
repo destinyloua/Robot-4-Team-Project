@@ -18,13 +18,18 @@ PktDef::PktDef() {
 PktDef::PktDef(char* src) {
     this->RawBuffer = nullptr;
     memcpy(&CmdPkt.header, src, sizeof(HEADER));
-    if(CmdPkt.header.Length >5){
+    if(CmdPkt.header.Drive == 1){
         CmdPkt.data = new char[sizeof(DRIVEBODY)];
         memcpy(CmdPkt.data, src + sizeof(HEADER), sizeof(DRIVEBODY));
         memcpy(&CmdPkt.CRC, src + sizeof(HEADER) + sizeof(DRIVEBODY), sizeof(CmdPkt.CRC));
     }
-    else {
+    else if(CmdPkt.header.Length == 5){
         memcpy(&CmdPkt.CRC, src + sizeof(HEADER), sizeof(CmdPkt.CRC));
+    }
+    else if (CmdPkt.header.Status == 1) {
+        CmdPkt.data = new char[sizeof(TELEMETRY)];
+        memcpy(CmdPkt.data, src + sizeof(HEADER), sizeof(TELEMETRY));
+        memcpy(&CmdPkt.CRC, src + sizeof(HEADER) + sizeof(TELEMETRY), sizeof(CmdPkt.CRC));
     }
 }
 
@@ -40,7 +45,13 @@ void PktDef::SetCmd(CmdType cmd) {
     }
     else if (cmd == SLEEP) {
         this->CmdPkt.header.Sleep = 1;
+        this->CmdPkt.header.Length = 5;
     }
+    else if (cmd == RESPONSE) {
+        this->CmdPkt.header.Status = 1;
+        this->CmdPkt.header.Length = 5;
+    }
+    CalcCRC();
 } 
 
 // for setting body data from a raw buffer 
@@ -61,7 +72,15 @@ void PktDef::SetPktCount(int count) {
 // returns the type of command as enum 
 CmdType PktDef::GetCmd()
 {
-	return CmdType();
+    if (CmdPkt.header.Drive == 1) {
+        return DRIVE;
+    }
+    else if (CmdPkt.header.Sleep == 1) {
+        return SLEEP;
+    }
+    else if (CmdPkt.header.Status == 1) {
+        return RESPONSE;
+    }
 }
 
 // returns acknowlegement - true if flag set
@@ -79,9 +98,17 @@ int PktDef::GetLength()
 // returns the drive body as a raw buffer 
 char* PktDef::GetBodyData()
 {
-    char* data = new char[sizeof(DRIVEBODY)];
-    memcpy(data, CmdPkt.data, sizeof(DRIVEBODY));
-    return data;
+    if (CmdPkt.header.Drive == 1) {
+        char* data = new char[sizeof(DRIVEBODY)];
+        memcpy(data, CmdPkt.data, sizeof(DRIVEBODY));
+        return data;
+    }
+    else if (CmdPkt.header.Status == 1) {
+        char* data = new char[sizeof(TELEMETRY)];
+        memcpy(data, CmdPkt.data, sizeof(TELEMETRY));
+        return data;
+    }
+    return nullptr;
 }
 
 // returns the packet count
@@ -132,9 +159,17 @@ void PktDef::CalcCRC()
     for (int i = 0; i < 8; i++) {
         count += (1 & (CmdPkt.header.Length >> i));
     }
-    if (CmdPkt.header.Length > 5) {
+    if (CmdPkt.header.Drive == 1 && CmdPkt.header.Length > 5) {
         //Count DRIVEBODY
         for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 8; j++) {
+                count += (1 & (CmdPkt.data[i] >> j));
+            }
+        }
+    }
+    else if(CmdPkt.header.Status == 1 && CmdPkt.header.Length>5)
+    {
+        for (int i = 0; i < sizeof(TELEMETRY); i++) {
             for (int j = 0; j < 8; j++) {
                 count += (1 & (CmdPkt.data[i] >> j));
             }
@@ -178,11 +213,17 @@ char* PktDef::GenPacket()
 
     RawBuffer = new char[size];
     memcpy(RawBuffer, &CmdPkt.header, sizeof(HEADER));
-    if (CmdPkt.header.Length > 5) {
+    if (CmdPkt.header.Length > 5 && CmdPkt.header.Drive == 1) {
         memcpy(RawBuffer + sizeof(HEADER), CmdPkt.data, sizeof(DRIVEBODY));
+        memcpy(RawBuffer + sizeof(HEADER) + sizeof(DRIVEBODY), &CmdPkt.CRC, sizeof(CmdPkt.CRC));
     }
-
-    memcpy(RawBuffer +sizeof(HEADER) + sizeof(DRIVEBODY), &CmdPkt.CRC, sizeof(CmdPkt.CRC));
+    else if (CmdPkt.header.Length > 5 && CmdPkt.header.Status == 1) {
+        memcpy(RawBuffer + sizeof(HEADER), CmdPkt.data, sizeof(TELEMETRY));
+        memcpy(RawBuffer + sizeof(HEADER) + sizeof(TELEMETRY), &CmdPkt.CRC, sizeof(CmdPkt.CRC));
+    }
+    else {
+        memcpy(RawBuffer + sizeof(HEADER), &CmdPkt.CRC, sizeof(CmdPkt.CRC));
+    }
     return RawBuffer;
 }
 
@@ -322,28 +363,67 @@ void PktDef::PrintHeader() {
 }
 
 void PktDef::PrintBody() {
-    unsigned char byte;
-    DRIVEBODY body;
-    memcpy(&body, CmdPkt.data, sizeof(DRIVEBODY));
-    cout << "---------- DRIVEBODY ----------" << endl;
-    cout << "Direction: " << static_cast<int>(body.Direction) << endl;
-    byte = static_cast<unsigned char>(CmdPkt.data[0]);
-    cout << std::bitset<8>(byte) << endl;
+    if (CmdPkt.header.Drive == 1) {
+        unsigned char byte;
+        DRIVEBODY body;
+        memcpy(&body, CmdPkt.data, sizeof(DRIVEBODY));
+        cout << "---------- DRIVE BODY ----------" << endl;
+        cout << "Direction: " << static_cast<int>(body.Direction) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[0]);
+        cout << std::bitset<8>(byte) << endl;
 
-    cout << "Duration: " << static_cast<int>(body.Duration) << endl;
-    byte = static_cast<unsigned char>(CmdPkt.data[1]);
-    cout << std::bitset<8>(byte) << endl;
+        cout << "Duration: " << static_cast<int>(body.Duration) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[1]);
+        cout << std::bitset<8>(byte) << endl;
 
-    cout << "Speed: " << static_cast<int>(body.Speed) << endl;
-    byte = static_cast<unsigned char>(CmdPkt.data[2]);
-    cout << std::bitset<8>(byte) << endl;
+        cout << "Speed: " << static_cast<int>(body.Speed) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        cout << std::bitset<8>(byte) << endl;
 
-    cout << "*Data: ";
-    for (int i = 0; i < 3; i++) {
-        byte = static_cast<unsigned char>(CmdPkt.data[i]);
-        cout << std::bitset<8>(byte)<< " ";
+        cout << "*Data: ";
+        for (int i = 0; i < 3; i++) {
+            byte = static_cast<unsigned char>(CmdPkt.data[i]);
+            cout << std::bitset<8>(byte) << " ";
+        }
+        cout << endl;
     }
-    cout << endl;
+    else if (CmdPkt.header.Status == 1) {
+        unsigned char byte;
+        TELEMETRY body;
+        memcpy(&body, CmdPkt.data, sizeof(TELEMETRY));
+        cout << "---------- TELEMETRY BODY ----------" << endl;
+        cout << "Last Pkt Counter: " << static_cast<int>(body.LastPktCounter) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[0]);
+        cout << std::bitset<16>(byte) << endl;
+
+        cout << "Current Grade: " << static_cast<int>(body.CurrentGrade) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[2]);
+        cout << std::bitset<16>(byte) << endl;
+
+        cout << "Hit Count: " << static_cast<int>(body.HitCount) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[4]);
+        cout << std::bitset<16>(byte) << endl;
+
+        cout << "Last Cmd: " << static_cast<int>(body.LastCmd) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[6]);
+        cout << std::bitset<8>(byte) << endl;
+
+        cout << "Last Cmd Value: " << static_cast<int>(body.LastCmdValue) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[7]);
+        cout << std::bitset<8>(byte) << endl;
+
+        cout << "Last Cmd Speed: " << static_cast<int>(body.LastCmdSpeed) << endl;
+        byte = static_cast<unsigned char>(CmdPkt.data[8]);
+        cout << std::bitset<8>(byte) << endl;
+
+        cout << "*Data: ";
+        for (int i =0; i < sizeof(TELEMETRY); i++) {
+            byte = static_cast<unsigned char>(CmdPkt.data[i]);
+            cout << std::bitset<8>(byte) << " ";
+        }
+        cout << endl;
+    }
+
 
     cout << endl;
     /*cout << "---------- BODY ----------" << endl;
