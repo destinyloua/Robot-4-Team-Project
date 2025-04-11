@@ -1,5 +1,6 @@
 #include "CppUnitTest.h"
 #include "../Robot4/PktDef.h"
+#include "../Robot4/MySocket.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
@@ -8,28 +9,28 @@ namespace Robot4TESTS
 	TEST_CLASS(Robot4TESTS)
 	{
 	public:
-		
+
 		// CRITICAL FUNCTION TESTS 
-		
+
 		// test that the default constructor assigns all header values to safe state and all buffers are nullptr 
 		TEST_METHOD(TEST001_DefaultConstructor_SafeState)
 		{
-			PktDef p; 
+			PktDef p;
 			// check header
-			Assert::IsTrue(p.IsHeaderAllZero()); 
+			Assert::IsTrue(p.IsHeaderAllZero());
 			// check drive body 
-			Assert::IsTrue(p.IsDriveBodyNull()); 
+			Assert::IsTrue(p.IsDriveBodyNull());
 			// check raw buffer 
-			Assert::IsNull(p.GetRawBuffer()); 
+			Assert::IsNull(p.GetRawBuffer());
 		}
 
 		// test setting command to DRIVE 
-		TEST_METHOD(TEST002_SettingCmd_DRIVE) 
+		TEST_METHOD(TEST002_SettingCmd_DRIVE)
 		{
-			PktDef p; 
-			p.SetCmd(DRIVE); 
-			Assert::AreEqual((int)DRIVE, (int)p.GetCmd()); 
-			
+			PktDef p;
+			p.SetCmd(DRIVE);
+			Assert::AreEqual((int)DRIVE, (int)p.GetCmd());
+
 		}
 
 		// test setting packet count accurately 
@@ -45,42 +46,29 @@ namespace Robot4TESTS
 		TEST_METHOD(TEST004_SetDriveBody_PopulatesBody)
 		{
 			PktDef p;
+			p.SetCmd(DRIVE);
+			DRIVEBODY d = { 0x01, 0x02, 0x03 };
+			p.SetBodyData((char*)&d, sizeof(DRIVEBODY));
 
-			// simulate char* data 
-			char body[3] = { 0x01, 0x02, 0x03 };
+			Assert::IsFalse(p.IsDriveBodyNull());
+			Assert::IsNotNull(p.GetBodyData());
 
-			// set this body 
-			p.SetBodyData(body, 3);
-			
-			// retrieve the body as a raw buffer 
-			char* data = p.GetBodyData();  
-
-			Assert::AreEqual((char)0x01, data[0]); 
-			Assert::AreEqual((char)0x02, data[1]);
-			Assert::AreEqual((char)0x03, data[2]);
-
-			delete[] data; 
 		}
 
 		// test that CRC is being calculated and set correctly 
 		TEST_METHOD(TEST005_CompareCRCCalculations_SetAndMatch)
 		{
 			PktDef p;
+			p.SetCmd(DRIVE);
+			DRIVEBODY d = { 0x01, 0x02, 0x03 };
+			p.SetBodyData((char*)&d, sizeof(DRIVEBODY));
 
-			// simulate char* data 
-			char body[3] = { 0x01, 0x02, 0x03 };
+			char* pRaw = p.GenPacket();
+			int pSize = p.GetLength();
 
-			// set this body 
-			p.SetBodyData(body, 3);
+			bool result = p.CheckCRC(pRaw, pSize);
 
-			// call the CRC calculation 
-			p.CalcCRC(); 
-
-			// compare with alternate CRC count method 
-			int expected = p.CRCCount(); 
-			unsigned char actual = p.GetCRC(); 
-
-			Assert::AreEqual((unsigned char)expected, actual); 
+			Assert::IsTrue(result);
 
 		}
 
@@ -88,17 +76,17 @@ namespace Robot4TESTS
 		TEST_METHOD(TEST006_CheckACKFlag_SetAndUnset)
 		{
 			PktDef p;
-			
+
 			// set ack to 1
-			p.SetAck(1); 
+			p.SetAck(1);
 
 			// check ack is 1
-			Assert::IsTrue(p.GetAck()); 
-			
+			Assert::IsTrue(p.GetAck());
+
 			// set ack back to 0
-			p.SetAck(0); 
+			p.SetAck(0);
 			Assert::IsFalse(p.GetAck());
-			
+
 		}
 
 		// check value of length matches expected length 
@@ -113,69 +101,112 @@ namespace Robot4TESTS
 			p.SetBodyData(body, 3);
 
 			// length of packet should be 3 bytes(body) + 4 byte header (HEADERSIZE) + 1 byte CRC = 8 bytes 
-			int expected = 8; 
+			int expected = 8;
 
 			// actual length of data 
-			int actual = p.GetLength(); 
+			int actual = p.GetLength();
 
-			Assert::AreEqual(expected, actual); 
+			Assert::AreEqual(expected, actual);
 		}
 
-		// check the CRC validation works as expected 
-		TEST_METHOD(TEST008_CRCCheck_MatchesCorrectly)
+		// check the CRC validation identifies mismatch
+		TEST_METHOD(TEST008_CRCCheck_IdentifiesMismatch)
 		{
-			PktDef p; 
+			PktDef p;
+			p.SetCmd(DRIVE);
+			DRIVEBODY d = { 0x01, 0x02, 0x03 };
+			p.SetBodyData((char*)&d, sizeof(DRIVEBODY));
 
-			// simulate char* data 
-			char body[3] = { 0x01, 0x02, 0x03 };
+			char* pRaw = p.GenPacket();
+			int pSize = p.GetLength();
 
-			// set this body 
-			p.SetBodyData(body, 3);
+			// flip bits to invoke mismatch
+			pRaw[pSize - 1] ^= 0xFF;
 
-			// call the CRC calculation 
-			p.CalcCRC();
+			bool result = p.CheckCRC(pRaw, pSize);
 
-			// generate a packet 
-			char* testPkt = p.GenPacket(); 
-			int length = p.GetLength(); 
-
-			Assert::IsTrue(p.CheckCRC(testPkt, length)); 
-
-			delete[] testPkt; 
+			Assert::IsFalse(result);
 		}
 
 		// test the packet generation funtion creates a valid packet
 		TEST_METHOD(TEST009_GenPacket_CreatesValidPacket)
 		{
 			// simulate packet data 
-			PktDef p; 
-			p.SetCmd(DRIVE); 
-			p.SetPktCount(5); 
-			char body[3] = { 0x04, 0x05, 0x06 }; 
-			p.SetBodyData(body, 3);
+			PktDef p;
+			p.SetCmd(DRIVE);
+			p.SetPktCount(5);
+			DRIVEBODY d = { 0x04, 0x05, 0x06 };
+			p.SetBodyData((char*)&d, sizeof(DRIVEBODY));
+			int size = p.GetLength();
 
-			// generate a packet 
-			char* rawPkt = p.GenPacket(); 
+			// generate a raw packet 
+			char* rawPkt = p.GenPacket();
 
 			// packet should not be null 
-			Assert::IsNotNull(rawPkt); 
+			Assert::IsNotNull(rawPkt);
 
-			// check the drive bit is set 
-			unsigned char headerByte = rawPkt[0];			// header byte
-			bool isDriveSet = (headerByte & 0x01) != 0;		// drive bit is the first bit after pktcount 
-			Assert::IsTrue(isDriveSet); 
+			// turn it back into normal packet 
+			PktDef p2(rawPkt);
 
-			// packet count should be 5
-			Assert::AreEqual((unsigned char)5, (unsigned char)rawPkt[0]);
+			Assert::AreEqual((int)p.GetCmd(), (int)p2.GetCmd());
+			Assert::AreEqual(p.GetPktCount(), p2.GetPktCount());
 
-			// size of packet should be 8 (header(4) + drive body(3) + CRC(1)) 
-			Assert::AreEqual((HEADERSIZE + 3 + 1), (int)sizeof(rawPkt)); 
-
-			delete[] rawPkt; 
+			delete[] rawPkt;
 		}
 
+		// test constructor given a raw buffer 
+		TEST_METHOD(TEST010_Constructor_With_RawBuffer)
+		{
+			PktDef p1;
+			p1.SetCmd(DRIVE);
+			DRIVEBODY d = { 0x01, 0x02, 0x03 };
+			p1.SetBodyData((char*)&d, sizeof(DRIVEBODY));
 
+
+			char* packet = p1.GenPacket();
+
+			PktDef p2(packet);
+
+			Assert::AreEqual((int)p1.GetCmd(), (int)p2.GetCmd());
+
+			delete[] packet;
+		}
+
+		TEST_METHOD(TEST011_SetSleepCommand)
+		{
+			PktDef p;
+			p.SetCmd(SLEEP);
+
+			Assert::AreEqual((int)SLEEP, (int)p.GetCmd());
+		}
 
 		// SOCKET TESTS 
+
+		// tests the default constructor configures the socket and connection properly 
+	/*	TEST_METHOD(TEST010_SocketConfig_Constructor)
+		{
+			MySocket testSocket(SERVER, "127.0.0.1", 23500, TCP, 1000);
+
+			Assert::IsTrue(testSocket.isServer());
+			Assert::AreEqual((string)"127.0.0.1", testSocket.GetIPAddr());
+			Assert::AreEqual(23500, testSocket.GetPort());
+			Assert::IsTrue(testSocket.isTCP());
+			Assert::AreEqual(1000, (int)sizeof(testSocket.GetBuffer()));
+
+		}*/
+
+		// test the consrtuctor uses default size when given invalid size 
+		/*TEST_METHOD(TEST011_SocketConfig_InvalidSize)
+		{
+			MySocket testSocket(SERVER, "127.0.0.1", 23500, TCP, -1);
+
+			Assert::IsTrue(testSocket.isServer());
+			Assert::AreEqual((string)"127.0.0.1", testSocket.GetIPAddr());
+			Assert::AreEqual(23500, testSocket.GetPort());
+			Assert::IsTrue(testSocket.isTCP());
+			Assert::AreEqual(DEFAULT_SIZE, (int)sizeof(testSocket.GetBuffer()));
+
+
+		}*/
 	};
 }

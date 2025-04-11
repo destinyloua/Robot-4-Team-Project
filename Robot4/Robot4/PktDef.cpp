@@ -274,29 +274,6 @@ bool PktDef::IsDriveBodyNull()
     return false;
 }
 
-// alternate method for counting CRC for testing 
-int PktDef::CRCCount()
-{
-    int count = 0; 
-
-    // use bitset to count bits in each field this time 
-    count += std::bitset<16>(CmdPkt.header.PktCount).count();
-    count += std::bitset<1>(CmdPkt.header.Drive).count();
-    count += std::bitset<1>(CmdPkt.header.Status).count();
-    count += std::bitset<1>(CmdPkt.header.Sleep).count();
-    count += std::bitset<1>(CmdPkt.header.Ack).count();
-    count += std::bitset<4>(CmdPkt.header.Padding).count();
-    count += std::bitset<8>(CmdPkt.header.Length).count();
-
-    // count body bits only if header length > HEADERSIZE
-    if (CmdPkt.header.Length > HEADERSIZE) {
-        for (int i = 0; i < 3; i++) {
-            count += std::bitset<8>(CmdPkt.data[i]).count();
-        }
-    }
-    return count;
-}
-
 
 //Debugging purpose
 void PktDef::PrintHeader() {
