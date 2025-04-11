@@ -1,15 +1,12 @@
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+
 #include "PktDef.h"
-#include <iostream>
+#include "MySocket.h"
 #include <bitset>
+#include <iostream>
 using namespace std;
 
-
-#include <iostream>
-#include <string>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-#pragma comment(lib, "Ws2_32.lib")
+//#pragma comment(lib, "Ws2_32.lib")
 
 char* sendPacketToRobot(PktDef pkt) {
     char* data = pkt.GenPacket();
@@ -166,28 +163,47 @@ char* sendPacketToRobotTCP(PktDef pkt) {
 
 
 int main() {
-    //Create PKT
+    ////Create PKT
+    //PktDef pkt;
+    //pkt.SetPktCount(1);
+    //pkt.SetCmd(RESPONSE);
+
+    ////char* body = new char[3];
+    ////body[0] = static_cast<char>(FORWARD);
+    ////body[1] = static_cast<char>(10);
+    ////body[2] = static_cast<char>(80);
+    ////pkt.SetBodyData(body, 3);
+    ////delete[] body;
+
+    //pkt.PrintPkt();
+    ////char* RxBuffer = sendPacketToRobot(pkt);
+
+    //char* pktData = pkt.GenPacket();
+
+    //cout << endl;
+    //char* data = sendPacketToRobot(pkt);
+
+    //PktDef pkt2(data);
+    //delete[] pktData, data;
+    //pkt2.PrintPkt();
+    
+    MySocket socket(CLIENT, "127.0.0.1", 25543, UDP, 1024);
     PktDef pkt;
     pkt.SetPktCount(1);
-    pkt.SetCmd(RESPONSE);
+    pkt.SetCmd(DRIVE);
 
-    //char* body = new char[3];
-    //body[0] = static_cast<char>(FORWARD);
-    //body[1] = static_cast<char>(10);
-    //body[2] = static_cast<char>(80);
-    //pkt.SetBodyData(body, 3);
-    //delete[] body;
+    char* body = new char[3];
+    body[0] = static_cast<char>(FORWARD);
+    body[1] = static_cast<char>(10);
+    body[2] = static_cast<char>(80);
+    pkt.SetBodyData(body, 3);
+    delete[] body;
 
-    pkt.PrintPkt();
-    //char* RxBuffer = sendPacketToRobot(pkt);
+    socket.SendData(pkt.GenPacket(), pkt.GetLength());
+    char* rx = new char[1024];
+    socket.GetData(rx);
 
-    char* pktData = pkt.GenPacket();
-
-    cout << endl;
-    char* data = sendPacketToRobotTCP(pkt);
-
-    PktDef pkt2(data);
-    delete[] pktData, data;
+    PktDef pkt2(rx);
     pkt2.PrintPkt();
 
 	return 1;
