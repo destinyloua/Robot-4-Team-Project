@@ -70,8 +70,7 @@ public:
 	//For Testing purpose
 	char* GetRawBuffer(); 
 	bool IsHeaderAllZero(); 
-	bool IsDriveBodyNull(); 
-	int CRCCount(); 
+	bool IsDriveBodyNull();
 	
 
 	//For Debugging purpose
