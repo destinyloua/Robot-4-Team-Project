@@ -39,10 +39,10 @@ string ResponseToString(PktDef reqpkt, PktDef respkt) {
 			int duration = static_cast<int>(body[1]);
 			int speed = static_cast<int>(body[2]);
 			if(direction == 1){
-				return "Robot is moving forward for " + to_string(duration) + " seconds at speed " + to_string(speed) + "\n";
+				return "{\"direction\": \"forward\", \"duration\": \"" + to_string(duration) + "\", \"speed\":\"" + to_string(speed) + "\"}";
 			}
 			else if(direction == 2){
-				return "Robot is moving backward for " + to_string(duration) + " seconds at speed " + to_string(speed) + "\n";
+				return "{\"direction\": \"backward\", \"duration\": \"" + to_string(duration) + "\", \"speed\":\"" + to_string(speed) + "\"}";
 			}
 			else if(direction == 3){
 				return "Robot is turning left for " + to_string(duration) + " seconds at speed " + to_string(speed) + "\n";
@@ -54,7 +54,51 @@ string ResponseToString(PktDef reqpkt, PktDef respkt) {
 		else{
 			return "Drive command failed";
 		}
+	}
 
+	else if(reqpkt.GetCmd() == SLEEP) {
+		if(respkt.GetAck() == 1){
+			return "Robot is going to sleep\n";
+		}
+		else{
+			return "Sleep command failed";
+		}
+	}
+
+	else if(reqpkt.GetCmd() == RESPONSE) {
+		if(respkt.GetLength() == 5 && respkt.GetAck() == 1){
+			return "Telemetry command recived, sending back data...";
+		}
+		else if(respkt.GetLength() > 5){
+			TELEMETRY tele;
+			memcpy(&tele, respkt.GetBodyData(), sizeof(TELEMETRY));
+			int lastPktCount = static_cast<int>(tele.LastPktCounter);
+			int currentGrade = static_cast<int>(tele.CurrentGrade);
+			int hitCount = static_cast<int>(tele.HitCount);
+			int lastCmdValue = static_cast<int>(tele.LastCmdValue);
+			int lastCmdSpeed = static_cast<int>(tele.LastCmdSpeed);
+			string lastCmd;
+			if(static_cast<int>(tele.LastCmd)== 1){
+				lastCmd = "forward";
+			}
+			else if(static_cast<int>(tele.LastCmd)== 2){
+				lastCmd = "backward";
+			}
+			else if(static_cast<int>(tele.LastCmd)== 3){
+				lastCmd = "left";
+			}
+			else if(static_cast<int>(tele.LastCmd)== 4){
+				lastCmd = "right";
+			}
+			else{
+				lastCmd = "unknown";
+			}
+
+			return "{\"lastPktCount\": \"" + to_string(lastPktCount) + "\", \"currentGrade\": \"" + to_string(currentGrade) + "\", \"hitCount\": \"" + to_string(hitCount) + "\", \"lastCmd\": \"" + lastCmd + "\", \"lastCmdValue\": \"" + to_string(lastCmdValue) + "\", \"lastCmdSpeed\": \"" + to_string(lastCmdSpeed) + "\"}";
+		}
+		else{
+			return "Telemetry command failed";
+		}
 	}
 }
 
@@ -107,21 +151,102 @@ int main()
 		get_file("../public/connect.html", "text/html", res);
 	});
 
-	// for sending robot drive/sleep command
+	// for sending robot /tele command
 	CROW_ROUTE(app, "/telecommand/").methods(HTTPMethod::Put)
-		([](const request& req, response& res) {
-
-
+		([&pktCount, &socket](const request& req, response& res) {
+			// PktDef reqpkt;
+			// reqpkt.SetCmd(RESPONSE);
+			// pktCount++;
+			// reqpkt.SetPktCount(pktCount);
+			// socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
+			// char* rx = new char[DEFAULT_SIZE];
+			// int received = socket.GetData(rx);
+			// if (received <= 0) {
+			// 	delete[] rx;
+			// 	res.code = 500;
+			// 	res.write("Failed to receive data from robot");
+			// 	res.end();
+			// 	return;
+			// }
+			// PktDef respkt(rx);
+			// delete[] rx;
+			// string response = ResponseToString(reqpkt, respkt);
+			// res.code = 200;
+			// res.write(response);
+			// res.end();
 		});
 
 	// for getting telemetry response
 	CROW_ROUTE(app, "/telemetry/request/").methods(HTTPMethod::Get)
-		([](const request& req, response& res) {
+		([&pktCount, &socket](const request& req, response& res) {
+			PktDef reqpkt;
+			reqpkt.SetCmd(RESPONSE);
+			pktCount++;
+			reqpkt.SetPktCount(pktCount);
+			socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
 
-
+			char* rx = new char[DEFAULT_SIZE];
+			int received = socket.GetData(rx);
+			if (received <= 0) {
+				delete[] rx;
+				res.code = 500;
+				res.write("Failed to receive data from robot");
+				res.end();
+				return;
+			}
+			PktDef respkt(rx);
+			delete[] rx;
+			if(respkt.GetAck() == 0){
+				res.code = 500;
+				res.write("Failed to receive telemetry data from robot");
+				res.end();
+				return;
+			}
+			else{
+				rx = new char[DEFAULT_SIZE];
+				received = socket.GetData(rx);
+				if (received <= 0) {
+					delete[] rx;
+					res.code = 500;
+					res.write("Failed to receive data from robot");
+					res.end();
+					return;
+				}
+				PktDef telePkt(rx);
+				delete[] rx;
+				string response = ResponseToString(reqpkt, telePkt);
+				res.code = 200;
+				res.write(response);
+				res.end();
+			}
 		});
 
-	// for getting telemetry response
+	// for sending sleep command to robot
+	CROW_ROUTE(app, "/sleep").methods(HTTPMethod::POST)
+	([&pktCount, &socket](const request& req, response& res) {
+		PktDef reqpkt;
+		pktCount++;
+		reqpkt.SetPktCount(pktCount);
+		reqpkt.SetCmd(SLEEP);
+		socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
+		char * rx = new char[DEFAULT_SIZE];
+		int received = socket.GetData(rx);
+		if (received <= 0) {
+			delete[] rx;
+			res.code = 500;
+			res.write("Failed to receive data from robot");
+			res.end();
+			return;
+		}
+		PktDef respkt(rx);
+		delete[] rx;
+		string response = ResponseToString(reqpkt, respkt);
+		res.code = 200;
+		res.write(response);
+		res.end();
+	});
+
+	// for sending drive command to robot
 	CROW_ROUTE(app, "/drive").methods(HTTPMethod::POST)
 		([&pktCount, &socket](const request& req, response& res) {
 			int direction =stoi(req.url_params.get("direction"));
@@ -149,7 +274,6 @@ int main()
 				return;
 			}
 			PktDef respkt(rx);
-			respkt.PrintPkt();
 
 			delete[] rx;
 			string response = ResponseToString(reqpkt, respkt);
