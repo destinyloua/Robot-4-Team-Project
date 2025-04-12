@@ -8,6 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
+  "/SharedDocker/MySocket.cpp" "CMakeFiles/robot.dir/MySocket.cpp.o" "gcc" "CMakeFiles/robot.dir/MySocket.cpp.o.d"
+  "/SharedDocker/PktDef.cpp" "CMakeFiles/robot.dir/PktDef.cpp.o" "gcc" "CMakeFiles/robot.dir/PktDef.cpp.o.d"
   "/SharedDocker/main.cpp" "CMakeFiles/robot.dir/main.cpp.o" "gcc" "CMakeFiles/robot.dir/main.cpp.o.d"
   )
 

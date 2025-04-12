@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connect to Robot</title>
+    <script src="/scripts/connect.js"></script>    
+    <link rel="stylesheet" href="/styles/styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>IP Address and Port Set Up</h1>
+        <form onsubmit="ConnectToRobot(event)">
+            <div style="text-align: center;">
+                <label for="ipAddress">IP Address</label>
+                <input id="ipAddress" placeholder="IPv4 Address" type="text" required/>    
+            </div>
+
+            <div style="text-align: center; margin-top: 10px;">
+                <label for="port">Port</label>
+                <input id="port" placeholder="Port" type="number" required/>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <button class="primaryBtn" id="connectBtn" type="submit">Connect</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="/scripts/connect.js"></script>
+</body>
+</html>
