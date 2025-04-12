@@ -79,15 +79,74 @@ function sendCommand(event) {
         fetch(url, {
             method: 'POST',
         })
-        .then(response => response.text())
+        .then(response => {
+            if(response.status === 200){
+                return response.json();
+            }
+            else{
+                throw new Error(response.status + ": " + response.statusText);
+            }
+        })
         .then(data => {
-            document.getElementById("responseDisplay").innerText = data;
+            var direction = data.direction;
+            var duration = data.duration;
+            var speed = data.speed;
+            document.getElementById("responseDisplay").style.color = "green";
+            document.getElementById("responseDisplay").innerText = "Robot is going " + direction + " for " + duration + " seconds at " + speed + " speed.";
         })
         .catch(error => {
             console.error("Error sending command:", error);
-            document.getElementById("responseDisplay").innerText = "Failed to send command.";
+            document.getElementById("responseDisplay").style.color = "red";
+            document.getElementById("responseDisplay").innerText = error.message;
         });
     }
+
+    else if (currentCommand === "sleep") {
+        const url = `/sleep`;
+
+        fetch(url, {
+            method: 'POST',
+        })
+        .then(response => {
+            if(response.status === 200){
+                document.getElementById("responseDisplay").style.color = "green";
+                document.getElementById("responseDisplay").innerText = "Robot is going to sleep...";
+            }
+            else{
+                throw new Error(response.status + ": "+response.statusText);
+            }
+        })
+        .catch(error => {
+            console.error("Error sending command:", error);
+            document.getElementById("responseDisplay").style.color = "red";
+            document.getElementById("responseDisplay").innerText = error.message;
+        });
+    }
+    else if (currentCommand === "telemetry") {
+        fetch('/telemetry/request/',{
+            method: 'GET',
+        })
+        .then(response => {
+            if(response.status === 200){
+                document.getElementById("responseDisplay").style.color = "green";
+                document.getElementById("responseDisplay").innerText = "Telemetry Response displayed below...";
+                return response.json();
+            }
+            else{
+                throw new Error(response.status + ": "+response.statusText);
+            }
+        })
+        .then(data =>{
+            var res = "Last Packet Count: " + data.lastPktCount + "\n" + "Current Grade: " + data.currentGrade + "\n" + "Hit Count: " + data.hitCount + "\n" + "Last Drive Command: " + data.lastCmd + "\n" + "Last Duration: " + data.lastCmdValue + "\n" + "Last Speed: " + data.lastCmdSpeed;  
+            document.getElementById("telemetryDisplay").innerText = res;
+        })
+        .catch(error => {
+            console.error("Error fetching telemetry data:", error);
+            document.getElementById("telemetryDisplay").style.color = "red";
+            document.getElementById("telemetryDisplay").innerText = error.message;
+        });
+    }
+
 }
 
 
