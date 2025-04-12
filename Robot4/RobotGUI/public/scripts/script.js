@@ -51,6 +51,46 @@ function executeCommand() {
     document.getElementById("responseDisplay").innerText = message;
 }
 
+// function sendCommand(event){
+//     event.preventDefault();
+//     var action
+//     if(currentCommand === "drive"){
+//         action = '/drive';
+//         var direction = encodeURIComponent(currentDirection);
+//         var duration = encodeURIComponent(document.getElementById('duration').value);
+//         var speed = encodeURIComponent(document.getElementById('speed').value);
+//         action += `?direction=${direction}&duration=${duration}&speed=${speed}`;
+
+//         document.getElementById("controlCommand").action = action;
+//         document.getElementById("controlCommand").submit();
+//     }
+// }
+
+function sendCommand(event) {
+    event.preventDefault();
+
+    if (currentCommand === "drive") {
+        const direction = encodeURIComponent(currentDirection);
+        const duration = encodeURIComponent(document.getElementById('duration').value);
+        const speed = encodeURIComponent(document.getElementById('speed').value);
+
+        const url = `/drive?direction=${direction}&duration=${duration}&speed=${speed}`;
+
+        fetch(url, {
+            method: 'POST',
+        })
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById("responseDisplay").innerText = data;
+        })
+        .catch(error => {
+            console.error("Error sending command:", error);
+            document.getElementById("responseDisplay").innerText = "Failed to send command.";
+        });
+    }
+}
+
+
 // update this with telemetry backend 
 function updateTelemetryData(data) {
     document.getElementById("telemetryDisplay").innerText = `Telemetry Data: ${data}`;
