@@ -41,5 +41,8 @@ public:
 	int GetPort();
 	SocketType GetType();
 	void SetType(SocketType);
+
+	ConnectionType GetConnectionType(); 
+	int GetMaxSize(); 
 };
 

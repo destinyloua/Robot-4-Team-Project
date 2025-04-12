@@ -183,17 +183,17 @@ namespace Robot4TESTS
 		// SOCKET TESTS 
 
 		// tests the default constructor configures the socket and connection properly 
-	/*	TEST_METHOD(TEST010_SocketConfig_Constructor)
+		TEST_METHOD(TEST012_SocketConfig_Constructor)
 		{
 			MySocket testSocket(SERVER, "127.0.0.1", 23500, TCP, 1000);
 
-			Assert::IsTrue(testSocket.isServer());
+			Assert::AreEqual((int)SERVER, (int)testSocket.GetType());
 			Assert::AreEqual((string)"127.0.0.1", testSocket.GetIPAddr());
 			Assert::AreEqual(23500, testSocket.GetPort());
-			Assert::IsTrue(testSocket.isTCP());
-			Assert::AreEqual(1000, (int)sizeof(testSocket.GetBuffer()));
+			Assert::AreEqual((int)TCP, (int)testSocket.GetConnectionType());
+			Assert::AreEqual(1000, testSocket.GetMaxSize()); 
 
-		}*/
+		}
 
 		// test the consrtuctor uses default size when given invalid size 
 		/*TEST_METHOD(TEST011_SocketConfig_InvalidSize)
