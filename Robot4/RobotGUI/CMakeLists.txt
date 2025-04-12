@@ -9,5 +9,9 @@ find_package(Boost COMPONENTS system filesystem REQUIRED)
 find_package(Threads)
 
 include_directories(${Boost_INCLUDE_DIRS})
-add_executable(robot main.cpp)
+add_executable(robot
+    main.cpp
+    MySocket.cpp
+    PktDef.cpp
+)
 target_link_libraries(robot ${Boost_LIBRARIES} Threads::Threads)

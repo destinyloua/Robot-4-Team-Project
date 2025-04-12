@@ -150,6 +150,20 @@ input {
     margin-top: 20px;
 }
 
+.primaryBtn{
+    background-color: #4CAF50; /* Green */
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+    .primaryBtn:hover {
+        background-color: #45a049; /* Slightly darker green */
+    }
+
 #responseDisplay {
     font-size: 18px;
     font-weight: bold;

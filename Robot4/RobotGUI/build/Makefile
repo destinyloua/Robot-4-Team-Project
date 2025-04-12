@@ -129,6 +129,54 @@ robot/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/build
 .PHONY : robot/fast
 
+MySocket.o: MySocket.cpp.o
+.PHONY : MySocket.o
+
+# target to build an object file
+MySocket.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/MySocket.cpp.o
+.PHONY : MySocket.cpp.o
+
+MySocket.i: MySocket.cpp.i
+.PHONY : MySocket.i
+
+# target to preprocess a source file
+MySocket.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/MySocket.cpp.i
+.PHONY : MySocket.cpp.i
+
+MySocket.s: MySocket.cpp.s
+.PHONY : MySocket.s
+
+# target to generate assembly for a file
+MySocket.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/MySocket.cpp.s
+.PHONY : MySocket.cpp.s
+
+PktDef.o: PktDef.cpp.o
+.PHONY : PktDef.o
+
+# target to build an object file
+PktDef.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/PktDef.cpp.o
+.PHONY : PktDef.cpp.o
+
+PktDef.i: PktDef.cpp.i
+.PHONY : PktDef.i
+
+# target to preprocess a source file
+PktDef.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/PktDef.cpp.i
+.PHONY : PktDef.cpp.i
+
+PktDef.s: PktDef.cpp.s
+.PHONY : PktDef.s
+
+# target to generate assembly for a file
+PktDef.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/robot.dir/build.make CMakeFiles/robot.dir/PktDef.cpp.s
+.PHONY : PktDef.cpp.s
+
 main.o: main.cpp.o
 .PHONY : main.o
 
@@ -162,6 +210,12 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... robot"
+	@echo "... MySocket.o"
+	@echo "... MySocket.i"
+	@echo "... MySocket.s"
+	@echo "... PktDef.o"
+	@echo "... PktDef.i"
+	@echo "... PktDef.s"
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
