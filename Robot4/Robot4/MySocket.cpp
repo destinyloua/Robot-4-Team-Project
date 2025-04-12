@@ -281,3 +281,14 @@ void MySocket::SetType(SocketType type) {
     }
     mySocket = type;
 }
+
+// return the socket type 
+ConnectionType MySocket::GetConnectionType()
+{
+    return connectionType;
+}
+
+int MySocket::GetMaxSize()
+{
+    return MaxSize;
+}

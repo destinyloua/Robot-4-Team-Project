@@ -101,7 +101,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <AdditionalLibraryDirectories>C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\Robot4\x64\Debug;$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>"C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\Robot4\x64\Debug\PktDef.obj";%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>"C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\Robot4\x64\Debug\PktDef.obj";"C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\Robot4\x64\Debug\MySocket.obj";%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
