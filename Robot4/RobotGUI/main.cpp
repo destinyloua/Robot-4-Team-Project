@@ -45,10 +45,10 @@ string ResponseToString(PktDef reqpkt, PktDef respkt) {
 				return "{\"direction\": \"backward\", \"duration\": \"" + to_string(duration) + "\", \"speed\":\"" + to_string(speed) + "\"}";
 			}
 			else if(direction == 3){
-				return "Robot is turning left for " + to_string(duration) + " seconds at speed " + to_string(speed) + "\n";
+				return "{\"direction\": \"left\", \"duration\": \"" + to_string(duration) + "\", \"speed\":\"" + to_string(speed) + "\"}";
 			}
 			else if(direction == 4){
-				return "Robot is turning right for " + to_string(duration) + " seconds at speed " + to_string(speed) + "\n";
+				return "{\"direction\": \"right\", \"duration\": \"" + to_string(duration) + "\", \"speed\":\"" + to_string(speed) + "\"}";
 			}
 		}
 		else{
