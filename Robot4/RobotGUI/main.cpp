@@ -152,28 +152,69 @@ int main()
 	});
 
 	// for sending robot /tele command
-	CROW_ROUTE(app, "/telecommand/").methods(HTTPMethod::Put)
+	CROW_ROUTE(app, "/telecommand").methods(HTTPMethod::Put)
 		([&pktCount, &socket](const request& req, response& res) {
-			// PktDef reqpkt;
-			// reqpkt.SetCmd(RESPONSE);
-			// pktCount++;
-			// reqpkt.SetPktCount(pktCount);
-			// socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
-			// char* rx = new char[DEFAULT_SIZE];
-			// int received = socket.GetData(rx);
-			// if (received <= 0) {
-			// 	delete[] rx;
-			// 	res.code = 500;
-			// 	res.write("Failed to receive data from robot");
-			// 	res.end();
-			// 	return;
-			// }
-			// PktDef respkt(rx);
-			// delete[] rx;
-			// string response = ResponseToString(reqpkt, respkt);
-			// res.code = 200;
-			// res.write(response);
-			// res.end();
+			auto cmd = req.url_params.get("cmd");
+			if(cmd && string(cmd) == "drive"){
+				int direction =stoi(req.url_params.get("direction"));
+				int duration = stoi(req.url_params.get("duration"));
+				int speed = stoi(req.url_params.get("speed"));
+
+				char* body = new char[3];
+				body[0] = static_cast<char>(direction);
+				body[1] = static_cast<char>(duration); // duration
+				body[2] = static_cast<char>(speed); // speed
+				PktDef reqpkt;
+				pktCount++;
+				reqpkt.SetPktCount(pktCount);
+				reqpkt.SetCmd(DRIVE);
+				reqpkt.SetBodyData(body, 3);
+				socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
+
+				char* rx = new char[DEFAULT_SIZE];
+				int received = socket.GetData(rx);
+				if (received <= 0) {
+					delete[] rx;
+					res.code = 500;
+					res.write("Failed to receive data from robot");
+					res.end();
+					return;
+				}
+				PktDef respkt(rx);
+
+				delete[] rx;
+				string response = ResponseToString(reqpkt, respkt);
+				res.code = 200;
+				res.write(response);
+				res.end();
+			}
+			else if(cmd && string(cmd) == "sleep"){
+				PktDef reqpkt;
+				pktCount++;
+				reqpkt.SetPktCount(pktCount);
+				reqpkt.SetCmd(SLEEP);
+				socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
+				char * rx = new char[DEFAULT_SIZE];
+				int received = socket.GetData(rx);
+				if (received <= 0) {
+					delete[] rx;
+					res.code = 500;
+					res.write("Failed to receive data from robot");
+					res.end();
+					return;
+				}
+				PktDef respkt(rx);
+				delete[] rx;
+				string response = ResponseToString(reqpkt, respkt);
+				res.code = 200;
+				res.write(response);
+				res.end();
+			}
+			else{
+				res.code = 400; // bad request
+				res.write("Invalid command\n");
+				res.end();
+			}
 		});
 
 	// for getting telemetry response
@@ -220,68 +261,6 @@ int main()
 				res.end();
 			}
 		});
-
-	// for sending sleep command to robot
-	CROW_ROUTE(app, "/sleep").methods(HTTPMethod::POST)
-	([&pktCount, &socket](const request& req, response& res) {
-		PktDef reqpkt;
-		pktCount++;
-		reqpkt.SetPktCount(pktCount);
-		reqpkt.SetCmd(SLEEP);
-		socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
-		char * rx = new char[DEFAULT_SIZE];
-		int received = socket.GetData(rx);
-		if (received <= 0) {
-			delete[] rx;
-			res.code = 500;
-			res.write("Failed to receive data from robot");
-			res.end();
-			return;
-		}
-		PktDef respkt(rx);
-		delete[] rx;
-		string response = ResponseToString(reqpkt, respkt);
-		res.code = 200;
-		res.write(response);
-		res.end();
-	});
-
-	// for sending drive command to robot
-	CROW_ROUTE(app, "/drive").methods(HTTPMethod::POST)
-		([&pktCount, &socket](const request& req, response& res) {
-			int direction =stoi(req.url_params.get("direction"));
-			int duration = stoi(req.url_params.get("duration"));
-			int speed = stoi(req.url_params.get("speed"));
-
-			char* body = new char[3];
-			body[0] = static_cast<char>(direction);
-			body[1] = static_cast<char>(duration); // duration
-			body[2] = static_cast<char>(speed); // speed
-			PktDef reqpkt;
-			pktCount++;
-			reqpkt.SetPktCount(pktCount);
-			reqpkt.SetCmd(DRIVE);
-			reqpkt.SetBodyData(body, 3);
-			socket.SendData(reqpkt.GenPacket(), reqpkt.GetLength());
-
-			char* rx = new char[DEFAULT_SIZE];
-			int received = socket.GetData(rx);
-			if (received <= 0) {
-				delete[] rx;
-				res.code = 500;
-				res.write("Failed to receive data from robot");
-				res.end();
-				return;
-			}
-			PktDef respkt(rx);
-
-			delete[] rx;
-			string response = ResponseToString(reqpkt, respkt);
-			res.code = 200;
-			res.write(response);
-			res.end();
-		});
-
 	app.port(25543).multithreaded().run();
 	return 1;
 }

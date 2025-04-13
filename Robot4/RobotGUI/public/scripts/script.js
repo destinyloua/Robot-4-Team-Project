@@ -74,10 +74,10 @@ function sendCommand(event) {
         const duration = encodeURIComponent(document.getElementById('duration').value);
         const speed = encodeURIComponent(document.getElementById('speed').value);
 
-        const url = `/drive?direction=${direction}&duration=${duration}&speed=${speed}`;
+        const url = `/telecommand?cmd=drive&direction=${direction}&duration=${duration}&speed=${speed}`;
 
         fetch(url, {
-            method: 'POST',
+            method: 'PUT',
         })
         .then(response => {
             if(response.status === 200){
@@ -102,10 +102,10 @@ function sendCommand(event) {
     }
 
     else if (currentCommand === "sleep") {
-        const url = `/sleep`;
+        const url = `/telecommand?cmd=sleep`;
 
         fetch(url, {
-            method: 'POST',
+            method: 'PUT',
         })
         .then(response => {
             if(response.status === 200){
