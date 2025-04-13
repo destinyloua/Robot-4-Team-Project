@@ -1,0 +1,11 @@
+﻿  MySocket.cpp
+  Robot4_TEST_MILESTONE2.cpp
+C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\Robot4_TEST_MILESTONE2\Robot4_TEST_MILESTONE2.cpp(138,31): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\Robot4_TEST_MILESTONE2\Robot4_TEST_MILESTONE2.cpp(148,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\Robot4_TEST_MILESTONE2\Robot4_TEST_MILESTONE2.cpp(170,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\Robot4_TEST_MILESTONE2\Robot4_TEST_MILESTONE2.cpp(177,32): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+  Generating Code...
+     Creating library C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TEST_MILESTONE2.lib and object C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TEST_MILESTONE2.exp
+  Robot4_TEST_MILESTONE2.vcxproj -> C:\Users\baona\OneDrive - Conestoga College\School\24-25\WINTER 25\Mobile and Network Systems\Project\Robot-4-Team-Project\Robot4\x64\Debug\Robot4_TEST_MILESTONE2.dll
+  'pwsh.exe' is not recognized as an internal or external command,
+  operable program or batch file.
