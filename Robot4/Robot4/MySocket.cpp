@@ -46,14 +46,12 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
             SvrAddr.sin_family = AF_INET;
             SvrAddr.sin_addr.s_addr = INADDR_ANY;
             SvrAddr.sin_port = htons(Port);
-            //Binding
-            if (bind(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) == SOCKET_ERROR) {
+            if (bind(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
                 cerr << "ERROR: Failed to bind" << endl;
                 closesocket(ConnectionSocket);
-                WSACleanup();
                 return;
             }
-            cout << "SERVER UDP setup, binding..." << endl;
+            cout << "SERVER UDP setup successfully" << endl;
         }
         return;
     }
@@ -72,14 +70,7 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
             SvrAddr.sin_family = AF_INET;
             SvrAddr.sin_addr.s_addr = inet_addr(ip.c_str());
             SvrAddr.sin_port = htons(Port);
-            //Connect (3-way handshake)
-            if (connect(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) == SOCKET_ERROR) {
-                cerr << "ERROR: Failed to connect to server" << endl;
-                closesocket(ConnectionSocket);
-                WSACleanup();
-                return;
-            }
-            cout << "CLIENT TCP connected successfully" << endl;
+            cout << "CLIENT TCP set up successfully" << endl;
         }
         else if (mySocket == SERVER) {
             cout << "Setting up SERVER" << endl;
@@ -93,38 +84,12 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
             SvrAddr.sin_family = AF_INET;
             SvrAddr.sin_addr.s_addr = INADDR_ANY;
             SvrAddr.sin_port = htons(Port);
-            //Binding
-            if (bind(WelcomeSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) == SOCKET_ERROR) {
-                cerr << "ERROR: Failed to bind" << endl;
-                closesocket(WelcomeSocket);
-                WSACleanup();
-                return;
-            }
-            cout << "SERVER TCP socket is binding..." << endl;
-            //Listening
-            if (listen(WelcomeSocket, 5) == SOCKET_ERROR) {
-                cerr << "ERROR: Failed to listen" << endl;
-                closesocket(WelcomeSocket);
-                WSACleanup();
-                return;
-            }
-            cout << "SERVER TCP is listening for connection..." << endl;
-            //Accepting
-            sockaddr_in ClientAddr;
-            int ClientAddrSize = sizeof(ClientAddr);
-            ConnectionSocket = accept(WelcomeSocket, (sockaddr*)&ClientAddr, &ClientAddrSize);
-            if (ConnectionSocket == INVALID_SOCKET) {
-                cerr << "ERROR: Failed to accept connection" << endl;
-                closesocket(WelcomeSocket);
-                WSACleanup();
-                return;
-            }
-            cout << "Client connected to SERVER TCP, data transmission ready..." << endl;
+            cout << "SERVER TCP set up successfully" << endl;
+            //test
         }
     }
 }
 
-// clean up memory 
 MySocket::~MySocket() {
     if (connectionType == TCP && mySocket == SERVER) {
         closesocket(WelcomeSocket);
@@ -134,7 +99,6 @@ MySocket::~MySocket() {
     delete[] Buffer;
 }
 
-// tcp 3 way handshake 
 void MySocket::ConnectTCP() {
     if (connectionType != TCP) {
         cerr << "ERROR: Socket is UDP" << endl;
@@ -154,6 +118,18 @@ void MySocket::ConnectTCP() {
     else if (mySocket == SERVER) {
         sockaddr_in clientAddr;
         int clientSize = sizeof(clientAddr);
+        if (bind(WelcomeSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) == SOCKET_ERROR) {
+            cerr << "ERROR: Failed to bind" << endl;
+            closesocket(WelcomeSocket);
+            WSACleanup();
+            return;
+        }
+        if (listen(WelcomeSocket, 1) == SOCKET_ERROR) {
+            cerr << "ERROR: Failed to listen" << endl;
+            closesocket(WelcomeSocket);
+            WSACleanup();
+            return;
+        }
         ConnectionSocket = accept(WelcomeSocket, (sockaddr*)&clientAddr, &clientSize);
         if (ConnectionSocket == INVALID_SOCKET) {
             cerr << "ERROR: Failed to accept connection" << endl;
@@ -167,9 +143,18 @@ void MySocket::ConnectTCP() {
 // tcp 4 way handshake 
 void MySocket::DisconnectTCP() {
     if (connectionType == TCP && bTCPConnect) {
-        shutdown(ConnectionSocket, SD_BOTH);
-        closesocket(ConnectionSocket);
-        bTCPConnect = false;
+        if (mySocket == CLIENT) {
+            closesocket(ConnectionSocket);
+            bTCPConnect = false;
+            cout << "CLIENT TCP Socket Disconnected" << endl;
+        }
+        else {
+            shutdown(ConnectionSocket, SD_BOTH);
+            closesocket(WelcomeSocket);
+            closesocket(ConnectionSocket);
+            bTCPConnect = false;
+            cout << "SERVER TCP Socket Disconnected" << endl;
+        }
     }
 }
 
@@ -205,14 +190,10 @@ int MySocket::GetData(char* outBuffer) {
             cerr << "ERROR: Failed to receive data (TCP)" << endl;
             return SOCKET_ERROR;
         }
-        if (received <= MaxSize) {
+        else {
             memcpy(outBuffer, Buffer, received);
             cout << received << " bytes of data received successfully (TCP)" << endl;
             return received;
-        }
-        else {
-            cerr << "ERROR: Data overflow, MaxSize is " << MaxSize << " bytes but " << received << " bytes of data were received (TCP)" << endl;
-            return SOCKET_ERROR;
         }
     }
     else {
@@ -222,15 +203,10 @@ int MySocket::GetData(char* outBuffer) {
             cerr << "ERROR: Failed to receive data (UDP)" << endl;
             return SOCKET_ERROR;
         }
-        //Overflow prevention
-        if (received <= MaxSize) {
+        else {
             memcpy(outBuffer, Buffer, received);
             cout << received << " bytes of data received successfully (UDP)" << endl;
             return received;
-        }
-        else {
-            cerr << "ERROR: Data overflow, MaxSize is " << MaxSize << " bytes but " << received << " bytes of data were received (UDP)" << endl;
-            return SOCKET_ERROR;
         }
     }
 }
@@ -242,14 +218,15 @@ string MySocket::GetIPAddr()
 }
 
 // change ip address 
-void MySocket::SetIPAddre(string ip)
+void MySocket::SetIPAddr(string ip)
 {
     // error if connection already established 
     if (bTCPConnect) {
-        cerr << "ERROR: Cannot change IP address while connected." << endl;
+        cout << "ERROR: Cannot change IP address while connected." << endl;
         return;
     }
     IPAddr = ip;
+    return;
 }
 
 // gets port number in use 
@@ -280,4 +257,20 @@ void MySocket::SetType(SocketType type) {
         return;
     }
     mySocket = type;
+}
+
+// return the socket type 
+ConnectionType MySocket::GetConnectionType()
+{
+    return connectionType;
+}
+
+int MySocket::GetMaxSize()
+{
+    return MaxSize;
+}
+
+bool MySocket::CheckConnection()
+{
+    return bTCPConnect;
 }

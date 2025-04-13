@@ -43,7 +43,7 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
                 close(ConnectionSocket);
                 return;
             }
-            cout << "SERVER UDP setup, binding..." << endl;
+            cout << "SERVER UDP setup successfully" << endl;
         }
         return;
     }
@@ -59,12 +59,12 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
             SvrAddr.sin_family = AF_INET;
             inet_pton(AF_INET, ip.c_str(), &SvrAddr.sin_addr);
             SvrAddr.sin_port = htons(Port);
-            if (connect(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
-                cerr << "ERROR: Failed to connect to server" << endl;
-                close(ConnectionSocket);
-                return;
-            }
-            cout << "CLIENT TCP connected successfully" << endl;
+            // if (connect(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
+            //     cerr << "ERROR: Failed to connect to server" << endl;
+            //     close(ConnectionSocket);
+            //     return;
+            // }
+            cout << "CLIENT TCP set up successfully" << endl;
         }
         else if (mySocket == SERVER) {
             cout << "Setting up SERVER" << endl;
@@ -76,27 +76,27 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
             SvrAddr.sin_family = AF_INET;
             SvrAddr.sin_addr.s_addr = INADDR_ANY;
             SvrAddr.sin_port = htons(Port);
-            if (bind(WelcomeSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
-                cerr << "ERROR: Failed to bind" << endl;
-                close(WelcomeSocket);
-                return;
-            }
-            cout << "SERVER TCP socket is binding..." << endl;
-            if (listen(WelcomeSocket, 5) < 0) {
-                cerr << "ERROR: Failed to listen" << endl;
-                close(WelcomeSocket);
-                return;
-            }
-            cout << "SERVER TCP is listening for connection..." << endl;
-            sockaddr_in ClientAddr;
-            socklen_t ClientAddrSize = sizeof(ClientAddr);
-            ConnectionSocket = accept(WelcomeSocket, (sockaddr*)&ClientAddr, &ClientAddrSize);
-            if (ConnectionSocket < 0) {
-                cerr << "ERROR: Failed to accept connection" << endl;
-                close(WelcomeSocket);
-                return;
-            }
-            cout << "Client connected to SERVER TCP, data transmission ready..." << endl;
+            // if (bind(WelcomeSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
+            //     cerr << "ERROR: Failed to bind" << endl;
+            //     close(WelcomeSocket);
+            //     return;
+            // }
+            // cout << "SERVER TCP socket is binding..." << endl;
+            // if (listen(WelcomeSocket, 5) < 0) {
+            //     cerr << "ERROR: Failed to listen" << endl;
+            //     close(WelcomeSocket);
+            //     return;
+            // }
+            // cout << "SERVER TCP is listening for connection..." << endl;
+            // sockaddr_in ClientAddr;
+            // socklen_t ClientAddrSize = sizeof(ClientAddr);
+            // ConnectionSocket = accept(WelcomeSocket, (sockaddr*)&ClientAddr, &ClientAddrSize);
+            // if (ConnectionSocket < 0) {
+            //     cerr << "ERROR: Failed to accept connection" << endl;
+            //     close(WelcomeSocket);
+            //     return;
+            // }
+            cout << "SERVER TCP set up successfully" << endl;
         }
     }
 }
