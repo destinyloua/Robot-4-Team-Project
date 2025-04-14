@@ -218,7 +218,7 @@ int main()
 		});
 
 	// for getting telemetry response
-	CROW_ROUTE(app, "/telemetry/request/").methods(HTTPMethod::Get)
+	CROW_ROUTE(app, "/telementry_request/").methods(HTTPMethod::Get)
 		([&pktCount, &socket](const request& req, response& res) {
 			PktDef reqpkt;
 			reqpkt.SetCmd(RESPONSE);
