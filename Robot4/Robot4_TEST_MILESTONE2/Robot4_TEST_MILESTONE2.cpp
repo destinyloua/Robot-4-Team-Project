@@ -10,6 +10,7 @@ namespace Robot4TESTMILESTONE2
 	TEST_CLASS(Robot4TESTMILESTONE2)
 	{
 	public:
+		// Test constructor initializes values correctly with server and tcp 
 		TEST_METHOD(TEST01_SocketConfig_Constructor_SERVER_TCP)
 		{
 			MySocket testSocket(SERVER, "127.0.0.1", 23500, TCP, 1000);
@@ -19,6 +20,8 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual((int)TCP, (int)testSocket.GetConnectionType());
 			Assert::AreEqual(1000, testSocket.GetMaxSize());
 		}
+
+		// Test constructor initializes values correctly with client and tcp 
 		TEST_METHOD(TEST02_SocketConfig_Constructor_CLIENT_TCP)
 		{
 			MySocket testSocket(CLIENT, "127.0.0.1", 23500, TCP, 1000);
@@ -28,6 +31,8 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual((int)TCP, (int)testSocket.GetConnectionType());
 			Assert::AreEqual(1000, testSocket.GetMaxSize());
 		}
+
+		// Test constructor initializes values correctly with server and udp 
 		TEST_METHOD(TEST03_SocketConfig_Constructor_SERVER_UDP)
 		{
 			MySocket testSocket(SERVER, "127.0.0.1", 23500, UDP, 1000);
@@ -37,6 +42,8 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual((int)UDP, (int)testSocket.GetConnectionType());
 			Assert::AreEqual(1000, testSocket.GetMaxSize());
 		}
+
+		// Test constructor initializes values correctly with client and tcp 
 		TEST_METHOD(TEST04_SocketConfig_Constructor_CLIENT_UDP)
 		{
 			MySocket testSocket(CLIENT, "127.0.0.1", 23500, UDP, 1000);
@@ -46,6 +53,8 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual((int)UDP, (int)testSocket.GetConnectionType());
 			Assert::AreEqual(1000, testSocket.GetMaxSize());
 		}
+
+		// Test tcp connection 
 		TEST_METHOD(TEST05_SocketConfig_ConnectTCP_1)
 		{
 			//Multithreads because ConnectTCP() blocks the main program until a client is connected
@@ -63,6 +72,7 @@ namespace Robot4TESTMILESTONE2
 
 			serverThread.join();
 		}
+
 		//Prevent ConnectionType == UDP use ConnectTcp()
 		TEST_METHOD(TEST06_SocketConfig_ConnectTCP_2)
 		{
@@ -74,6 +84,8 @@ namespace Robot4TESTMILESTONE2
 			server.ConnectTCP();
 			Assert::IsFalse(client.CheckConnection());
 		}
+
+		//Test ability to disconnect from tcp 
 		TEST_METHOD(TEST07_SocketConfig_DisconnectConnectTCP_1)
 		{
 			//Multithreads because ConnectTCP() blocks the main program until a client is connected
@@ -94,6 +106,8 @@ namespace Robot4TESTMILESTONE2
 
 			serverThread.join();
 		}
+
+		//Test ability to disconnect from tcp 
 		TEST_METHOD(TEST08_SocketConfig_DisconnectConnectTCP_2)
 		{
 			//Multithreads because ConnectTCP() blocks the main program until a client is connected
@@ -161,6 +175,7 @@ namespace Robot4TESTMILESTONE2
 			serverThread.join();
 		}
 
+		//Test data sent with udp 
 		TEST_METHOD(TEST11_SocketConfig_SendData_GetData_3_UDP) {
 			MySocket server(SERVER, "127.0.0.1", 5051, UDP, 1024);
 			MySocket client(CLIENT, "127.0.0.1", 5051, UDP, 1024);
@@ -186,6 +201,7 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual((int)string(msg2).size(), receivedBytes2);
 		}
 
+		//Test setting type from server to client then checking connection 
 		TEST_METHOD(TEST12_SocketConfig_SetType_1) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -202,6 +218,8 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual(expected, type);
 			serverThread.join();
 		}
+
+		//Test setting type client to server then checking connection 
 		TEST_METHOD(TEST13_SocketConfig_SetType_2) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -218,6 +236,8 @@ namespace Robot4TESTMILESTONE2
 			client.ConnectTCP();
 			serverThread.join();
 		}
+
+		//Test setting type to client 
 		TEST_METHOD(TEST14_SocketConfig_SetType_3) {
 			MySocket server(SERVER, "127.0.0.1", 5051, UDP, 1024);
 			MySocket client(CLIENT, "127.0.0.1", 5051, UDP, 1024);
@@ -228,6 +248,7 @@ namespace Robot4TESTMILESTONE2
 			Assert::AreEqual(expected, type);
 		}
 
+		//Test setting the same ip address for client and server then checking connection 
 		TEST_METHOD(TEST15_SocketConfig_SetIPAddr_1) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -244,6 +265,7 @@ namespace Robot4TESTMILESTONE2
 			serverThread.join();
 		}
 
+		//Test setting different ip addresses for client and server then checking connection 
 		TEST_METHOD(TEST16_SocketConfig_SetIPAddr_2) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -260,12 +282,14 @@ namespace Robot4TESTMILESTONE2
 			serverThread.join();
 		}
 
+		//Test changing the client ip address is successful 
 		TEST_METHOD(TEST17_SocketConfig_SetIPAddr_3) {
 			MySocket testSocket(CLIENT, "127.0.0.1", 5051, TCP, 1024);
 			testSocket.SetIPAddr("127.0.0.2");
 			Assert::AreEqual(string("127.0.0.2"), testSocket.GetIPAddr());
 		}
 
+		//Test changing port and checking connection is successful 
 		TEST_METHOD(TEST18_SocketConfig_SetPort_1) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -282,6 +306,7 @@ namespace Robot4TESTMILESTONE2
 			serverThread.join();
 		}
 
+		//Test port is not changed while connection is established 
 		TEST_METHOD(TEST19_SocketConfig_SetPort_2) {
 			std::thread serverThread([] {
 				MySocket server(SERVER, "127.0.0.1", 5051, TCP, 1024);
@@ -298,6 +323,7 @@ namespace Robot4TESTMILESTONE2
 			serverThread.join();
 		}
 
+		//Test client port can be changed 
 		TEST_METHOD(TEST20_SocketConfig_SetPort_3) {
 			MySocket testSocket(CLIENT, "127.0.0.1", 5051, UDP, 1024);
 			testSocket.SetPort(23500);
