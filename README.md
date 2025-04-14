@@ -26,9 +26,8 @@ This is the socket definition for the robot assignment. It will allow our machin
 ## Execution Instructions 
 
 Simulation Test:
-1) Run the robot simulator application (the April 2025 version). 
-2) From the Robot4 Visual Studio solution, run main.cpp. 
-3) You should see that UDP is used to send the robot simulator data, and the robot simulator should have received a DRIVE forward command for 10 seconds at speed 80. 
+1) Ensure you have the latest robot simulator application downloaded (the April 2025 version). 
+2) Ensure your simulator is set to use port 25543.  
 
 Unit Tests: 
 The unit tests have been reorganized by milestone. The milestone #1 tests have been refined for better coverage and accuracy. You should not need to adjust the configuration properties, as we have linked the necessary files directly in the project. 
