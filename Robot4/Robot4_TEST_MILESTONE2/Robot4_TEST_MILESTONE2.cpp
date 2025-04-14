@@ -329,5 +329,27 @@ namespace Robot4TESTMILESTONE2
 			testSocket.SetPort(23500);
 			Assert::AreEqual(23500, testSocket.GetPort());
 		}
+
+		//Test if socket can send pkt to robot
+		TEST_METHOD(TEST21_SocketConfig_SendPkt) {
+			MySocket testSocket(CLIENT, "127.0.0.1", 25543, UDP, 1024);
+			PktDef pkt;
+			pkt.SetPktCount(1);
+			pkt.SetCmd(DRIVE);
+			char* body = new char[3];
+			body[0] = static_cast<unsigned char>(FORWARD);
+			body[1] = static_cast<unsigned char>(10);
+			body[2] = static_cast<unsigned char>(100);
+			pkt.SetBodyData(body, 3);
+			delete[] body;
+			testSocket.SendData(pkt.GenPacket(), pkt.GetLength());
+
+			char* response = new char[DEFAULT_SIZE];
+			int received = testSocket.GetData(response);
+			PktDef responsePkt(response);
+			Assert::IsTrue(responsePkt.GetAck());
+			//Hard coded Pkt size without body
+			Assert::AreEqual(5, received);
+		}
 	};
 }
