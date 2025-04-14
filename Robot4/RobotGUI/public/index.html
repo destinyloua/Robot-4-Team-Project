@@ -8,7 +8,7 @@
 </head>
 <body>
     <div>
-        <div class="container">
+        <div class="container" style="margin-top: 10px;">
             <h1>Robot Control Panel</h1>
             <form id="controlCommand">
                 <!-- Command Section -->
@@ -26,16 +26,10 @@
                 <section class="directions">
                     <h2>Directions</h2>
                     <div class="direction-buttons">
-                        <!-- <button class="direction-btn" id="forwardBtn" onclick="selectDirection('forward')" disabled>Forward</button>
-                        <button class="direction-btn" id="backwardBtn" onclick="selectDirection('backward')" disabled>Backward</button>
-                        <button class="direction-btn" id="leftBtn" onclick="selectDirection('left')" disabled>Left</button>
-                        <button class="direction-btn" id="rightBtn" onclick="selectDirection('right')" disabled>Right</button>
-                        -->
-
-                        <button  type="button" class="direction-btn" id="forwardBtn" onclick="selectDirection('1')" disabled>Forward</button>
-                        <button  type="button" class="direction-btn" id="backwardBtn" onclick="selectDirection('2')" disabled>Backward</button>
-                        <button  type="button" class="direction-btn" id="leftBtn" onclick="selectDirection('3')" disabled>Left</button>
-                        <button  type="button" class="direction-btn" id="rightBtn" onclick="selectDirection('4')" disabled>Right</button>
+                        <button  type="button" class="direction-btn" id="1Btn" onclick="selectDirection('1')" disabled>Forward</button>
+                        <button  type="button" class="direction-btn" id="2Btn" onclick="selectDirection('2')" disabled>Backward</button>
+                        <button  type="button" class="direction-btn" id="3Btn" onclick="selectDirection('3')" disabled>Right</button>
+                        <button  type="button" class="direction-btn" id="4Btn" onclick="selectDirection('4')" disabled>Left</button>
                     </div>
                 </section>
 
@@ -64,11 +58,11 @@
             <!-- Telemetry Response Panel -->
             <section class="telemetry-panel">
                 <h2>Telemetry Response</h2>
-                <div id="telemetryDisplay">Telemetry data will appear here...</div>
+                <div id="telemetryDisplay" style="text-align: start;">Telemetry data will appear here...</div>
             </section>
         </div>
     
-        <div class="container" style="margin-top: 10px; text-align: center;">
+        <div class="container" style="margin-top: 10px; margin-bottom: 10px; text-align: center;">
             <a href="/connect">
                 <button class="primaryBtn">Set Up Connection</button>
             </a>

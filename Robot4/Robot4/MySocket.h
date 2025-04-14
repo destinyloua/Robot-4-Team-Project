@@ -36,7 +36,7 @@ public:
 	void SendData(const char* data, int size); //Done
 	int GetData(char* RxBuffer);
 	string GetIPAddr();
-	void SetIPAddre(string ip);
+	void SetIPAddr(string ip);
 	void SetPort(int port);
 	int GetPort();
 	SocketType GetType();
@@ -44,5 +44,7 @@ public:
 
 	ConnectionType GetConnectionType(); 
 	int GetMaxSize(); 
+
+	bool CheckConnection();
 };
 
