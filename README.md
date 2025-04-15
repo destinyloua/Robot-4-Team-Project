@@ -41,7 +41,7 @@ The interface is currently in development with plans to be complete before the d
 
 1) Ensure your machine has Docker running. 
 2) From the command terminal, you may run a command similar to: 
-docker run --rm -ti -p 25543:25543 -v C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\RobotGUI:/SharedDocker webserver_dev bash
+`docker run --rm -ti -p 25543:25543 -v C:\Users\ddlou\OneDrive\Documents\GitHub\Robot-4-Team-Project\Robot4\RobotGUI:/SharedDocker webserver_dev bash`
 *This may need to change based on the file path on your computer, this is just an example* 
 3) Navigate into the SharedDocker directory, then the build directory. 
 4) Run the command "make."
