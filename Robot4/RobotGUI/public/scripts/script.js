@@ -123,7 +123,7 @@ function sendCommand(event) {
         });
     }
     else if (currentCommand === "telemetry") {
-        fetch('/telementry_request/',{
+        fetch('/telemetry_request',{
             method: 'GET',
         })
         .then(response => {

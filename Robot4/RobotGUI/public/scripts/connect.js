@@ -13,11 +13,29 @@ function ConnectToRobot(event){
     .then(response => response.text()) // Handle plain text response
     .then(data => {
         console.log('Connection response:', data);
-        alert('Connected to robot!');
+        alert(data);
         window.location.href = '/'; // Redirect to robot page
     })
     .catch(error => {
         console.error('Error connecting to robot:', error);
         alert('Failed to connect to robot');
+    });
+};
+
+function DisconnectToRobot(event){
+    event.preventDefault();
+
+
+    const url = "/disconnect";
+    fetch(url, {method: 'POST'})
+    .then(response => response.text()) // Handle plain text response
+    .then(data => {
+        console.log('Server response:', data);
+        alert(data);
+        window.location.href = '/'; // Redirect to robot page
+    })
+    .catch(error => {
+        console.error('Error disconnecting the robot:', error);
+        alert('Failed to disconnect the robot');
     });
 };
