@@ -129,7 +129,7 @@ int main()
 
 		});
 
-	// for connecting  
+	// for connecting with UDP -- default connection method 
 	CROW_ROUTE(app, "/connect/<string>/<int>").methods(HTTPMethod::Post)
 		([&socket](const request& req, response& res, string ipAddress, int port) {
 			// TODO: logic to connect goes here
@@ -142,6 +142,21 @@ int main()
 			res.code = 200;
 			res.write("Connected to robot at " + ipAddress + ":" + to_string(port) + " by UDP connection (Connectionless)\n");
 			res.end();
+		});
+
+	// for connecting with TCP -- user must select TCP from connect page 
+	CROW_ROUTE(app, "/connect/<string>/<int>/TCP").methods(HTTPMethod::Post)
+		([&socket](const request& req, response& res, string ipAddress, int port) {
+		// TODO: logic to connect goes here
+		socket.SetIPAddress(ipAddress);
+		socket.SetPort(port);
+		socket.SetType(CLIENT);
+		socket.SetConnection(TCP);
+		socket.ConnectTCP();
+
+		res.code = 200;
+		res.write("Connected to robot at " + ipAddress + ":" + to_string(port) + " by TCP connection (Connection oriented)\n");
+		res.end();
 		});
 
 	// for connecting  
