@@ -48,3 +48,22 @@ The interface is currently in development with plans to be complete before the d
 5) Run the command "./robot"
 6) In your browser, vist "http://localhost:25543/" (*the port may vary if you used a different one in step 2*). 
 7) You should see the Robot Control Panel design concept as of 04/13/2025. 
+
+# 04/16/2025: Milestone #3
+
+This is the final version of the robot assignment. Our program can successfully send commands and receive telemetry responses from the robot simulator. It is ready to be tested with the actual robot on 04/17/2025 for the final competition. 
+
+NOTE: For the previous milestones, the PktDef and MySocket were written using the WinSock library to allow for unit testing with Visual Studio Native Test. To ensure that the program can be run in a Linux environment with Docker, we have changed the implementation to follow the standards for C++ socket programming in Linux. The core logic and all files remain the same, but we have adjusted the syntax for a Linux environment. 
+
+## Execution Instructions 
+
+Robot Simulator and Final Demo: 
+1) Ensure you have the latest robot simulator application downloaded (the April 2025 version), if using the simulator app. 
+2) Set the simulator port to any port you wish to use, if using the simulator app.
+3) Run the robot project in a Docker container, using port 25543. 
+4) Access the Command GUI from a browser by entering the IP address of the machine running the web server, in the search bar. 
+5) Use the GUI to set up your connection by entering the IP and port used by the robot/simulator. 
+6) Use the GUI to input command parameters. 
+7) "Send" the command to the robot. 
+
+The frontend (Command GUI) handles user input, allowing you to customize the connection setup and robot commands. The Command GUI collaborates with the RESTful routes (in main.cpp) that facilitate the communication between our project and the robot. The input is passed to the backend, where PktDef and MySocket handle the logic for data communication. PktDef will handle serialization/deserialization of data and MySocket will handle the protocols and socket configurations. All feedback from the robot will be displayed on the Command GUI and in the robot/simulator terminal. 

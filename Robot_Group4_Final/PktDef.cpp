@@ -144,6 +144,7 @@ bool PktDef::CheckCRC(char* src, int size)
 	return calculated == received;
 }
 
+// calculates and sets CRC
 void PktDef::CalcCRC()
 {
     int count = 0;
@@ -364,6 +365,7 @@ void PktDef::PrintHeader() {
     cout << endl;*/
 }
 
+// prints drive body data 
 void PktDef::PrintBody() {
     if (CmdPkt.header.Drive == 1) {
         unsigned char byte;
@@ -451,6 +453,7 @@ void PktDef::PrintBody() {
     cout << endl;*/
 }
 
+// prints packet data 
 void PktDef::PrintPkt()
 {
     PrintHeader();

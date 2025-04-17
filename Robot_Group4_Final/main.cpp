@@ -1,6 +1,8 @@
 // CSCN72050 Final Project: Command and Control GUI 
 // Destiny Louangsombath & Tyler Dao  
 
+// The RESTful routes for the Command and Control GUI 
+
 #define CROW_MAIN
 #include "./PktDef.h"
 #include "./MySocket.h"
@@ -31,6 +33,7 @@ void get_file(const string& fileName, const string& content_type, response& res)
 	res.end(); 
 }
 
+// return packet data as strings for readability 
 string ResponseToString(PktDef reqpkt, PktDef respkt) {
 	if(reqpkt.GetCmd() == DRIVE) {
 		if(respkt.GetAck() == 1){
@@ -103,6 +106,7 @@ string ResponseToString(PktDef reqpkt, PktDef respkt) {
 	}
 }
 
+// takes raw data from socket and turns it into a readable response 
 void Response(response& res, MySocket* socket, PktDef reqpkt) {
 	char* rx = new char[DEFAULT_SIZE];
 	int received = socket->GetData(rx);
@@ -128,6 +132,7 @@ int main()
 	int pktCount = 0;
 	crow::SimpleApp app;
 	MySocket* socket;
+
 	// homepage (default route)
 	CROW_ROUTE(app, "/")
 		([](const request &req, response &res) { 
@@ -178,9 +183,10 @@ int main()
 		}
 		});
 
+	// for disconnecting TCP (4 way handshake) 
 	CROW_ROUTE(app, "/disconnect").methods(HTTPMethod::Post)
 	([&](const request& req, response& res) {
-	// TODO: logic to connect goes here
+	// TODO: logic to disconnect goes here
 	socket->DisconnectTCP();
 	if(socket->CheckTCPConnection() == true){
 		res.code = 500;
@@ -194,7 +200,7 @@ int main()
 	}
 	});
 
-	// for connecting  
+	// takes user to connection setup page  
 	CROW_ROUTE(app, "/connect").methods(HTTPMethod::Get)
 	([](const request& req, response& res) {
 		// TODO: logic to connect goes here

@@ -9,10 +9,12 @@
 
 using namespace std;
 
+// default constructor 
 MySocket::MySocket(): bTCPConnect(false), MaxSize(DEFAULT_SIZE)
 {
 }
 
+// constructor with parameters 
 MySocket::MySocket(SocketType type, std::string ip, unsigned int port, ConnectionType connType, unsigned int bufferSize)
     : mySocket(type), IPAddr(ip), Port(port), connectionType(connType), bTCPConnect(false), MaxSize(DEFAULT_SIZE)
 {
@@ -79,6 +81,7 @@ MySocket::MySocket(SocketType type, std::string ip, unsigned int port, Connectio
     }
 }
 
+// destructor to close TCP connection and/or delete buffer 
 MySocket::~MySocket() {
     if (connectionType == TCP && mySocket == SERVER) {
         close(WelcomeSocket);
@@ -87,7 +90,10 @@ MySocket::~MySocket() {
     delete[] Buffer;
 }
 
+// sets up TCP connection (3 way handshake) 
 void MySocket::ConnectTCP() {
+
+    // prevent UDP socket from initiating TCP connection 
     if (connectionType != TCP) {
         cerr << "ERROR: Socket is UDP" << endl;
         return;
@@ -123,6 +129,7 @@ void MySocket::ConnectTCP() {
     }
 }
 
+// terminates TCP connection (4 way handshake) 
 void MySocket::DisconnectTCP() {
     if (connectionType == TCP && bTCPConnect) {
         shutdown(ConnectionSocket, SHUT_RDWR);
@@ -131,7 +138,10 @@ void MySocket::DisconnectTCP() {
     }
 }
 
+// transmits raw data over socket 
 void MySocket::SendData(const char* data, int len) {
+
+    // TCP support
     if (connectionType == TCP) {
         int sent = send(ConnectionSocket, data, len, 0);
         if (sent < 0) {
@@ -141,6 +151,7 @@ void MySocket::SendData(const char* data, int len) {
         cout << sent << " bytes of data sent successfully (TCP)" << endl;
         return;
     }
+    // UDP support 
     else {
         int sent = sendto(ConnectionSocket, data, len, 0, (sockaddr*)&SvrAddr, sizeof(SvrAddr));
         if (sent < 0) {
@@ -152,7 +163,10 @@ void MySocket::SendData(const char* data, int len) {
     }
 }
 
+// retrieves last block of raw data from the socket buffer 
 int MySocket::GetData(char* outBuffer) {
+   
+    // put received message into buffer and return bytes written 
     Buffer = new char[MaxSize];
     if (connectionType == TCP) {
         int received = recv(ConnectionSocket, Buffer, MaxSize, 0);
@@ -190,13 +204,16 @@ int MySocket::GetData(char* outBuffer) {
     }
 }
 
+// return the ip address currently configured 
 string MySocket::GetIPAddr()
 {
     return IPAddr;
 }
 
+// to change the ip address currently configured 
 void MySocket::SetIPAddress(string ip)
 {
+    // prevent ip change if TCP connection already established 
     if (bTCPConnect) {
         cerr << "ERROR: Cannot change IP address while connected." << endl;
         return;
@@ -204,12 +221,16 @@ void MySocket::SetIPAddress(string ip)
     this->IPAddr = ip;
 }
 
+// return the default port number 
 int MySocket::GetPort()
 {
     return Port;
 }
 
+// change default port 
 void MySocket::SetPort(int port) {
+
+    // prevent port change if TCP connection already established 
     if (bTCPConnect) {
         cerr << "ERROR: Cannot change port while connected." << endl;
         return;
@@ -217,11 +238,15 @@ void MySocket::SetPort(int port) {
     this->Port = port;
 }
 
+// return the type of socket (client or server) 
 SocketType MySocket::GetType() {
     return mySocket; 
 }
 
+// change the socket type 
 void MySocket::SetType(SocketType type) {
+
+    // prevent socket type change is TCP connection already established 
     if (bTCPConnect) {
         cerr << "ERROR: Cannot change type while connected." << endl;
         return;
@@ -229,7 +254,10 @@ void MySocket::SetType(SocketType type) {
     this->mySocket = type;
 }
 
+// change connection type (TCP/UDP) 
 void MySocket::SetConnection(ConnectionType connType) {
+
+    // prevent connection type change if TCP connection alreafdy established 
     if (bTCPConnect) {
         cerr << "ERROR: Cannot change connection type while connected." << endl;
         return;
@@ -237,6 +265,7 @@ void MySocket::SetConnection(ConnectionType connType) {
     this->connectionType = connType;
 }
 
+// return the status of a TCP connection (true = established) 
 bool MySocket::CheckTCPConnection()
 {
     return bTCPConnect;
