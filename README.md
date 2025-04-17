@@ -53,13 +53,9 @@ The interface is currently in development with plans to be complete before the d
 
 This is the final version of the robot assignment. Our program can successfully send commands and receive telemetry responses from the robot simulator. It is ready to be tested with the actual robot on 04/17/2025 for the final competition. 
 
-<<<<<<< Updated upstream
-NOTE: For the previous milestones, the PktDef and MySocket were written using the WinSock library to allow for unit testing with Visual Studio Native Test. To ensure that the program can be run in a Linux environment with Docker, we have changed the implementation to follow the standards for C++ socket programming in Linux. The core logic and all files remain the same, but we have adjusted the syntax for a Linux environment. 
-=======
 ### NOTE
 - For the previous milestones, the PktDef and MySocket were written using the WinSock library to allow for unit testing with Visual Studio Native Test. To ensure that the program can be run in a Linux environment with Docker, we have changed the implementation to follow the standards for C++ socket programming in Linux. The core logic and all files remain the same, but we have adjusted the syntax for a Linux environment. 
 - `Robot_Group4_Final` will be used in the demo and it is our final version.
->>>>>>> Stashed changes
 
 ## Execution Instructions 
 
