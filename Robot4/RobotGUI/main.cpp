@@ -153,11 +153,33 @@ int main()
 		socket.SetType(CLIENT);
 		socket.SetConnection(TCP);
 		socket.ConnectTCP();
-
-		res.code = 200;
-		res.write("Connected to robot at " + ipAddress + ":" + to_string(port) + " by TCP connection (Connection oriented)\n");
-		res.end();
+		if(socket.CheckTCPConnection() == false){
+			res.code = 500;
+			res.write("Failed to connect to robot at " + ipAddress + ":" + to_string(port) + " by TCP connection (Connection oriented)\n");
+			res.end();
+		}
+		else{
+			res.code = 200;
+			res.write("Connected to robot at " + ipAddress + ":" + to_string(port) + " by TCP connection (Connection oriented)\n");
+			res.end();
+		}
 		});
+
+	CROW_ROUTE(app, "/disconnect").methods(HTTPMethod::Post)
+	([&socket](const request& req, response& res) {
+	// TODO: logic to connect goes here
+	socket.DisconnectTCP();
+	if(socket.CheckTCPConnection() == true){
+		res.code = 500;
+		res.write("Failed to disconnect the robot\n");
+		res.end();
+	}
+	else{
+		res.code = 200;
+		res.write("Robot is disconnected\n");
+		res.end();
+	}
+	});
 
 	// for connecting  
 	CROW_ROUTE(app, "/connect").methods(HTTPMethod::Get)
@@ -233,7 +255,7 @@ int main()
 		});
 
 	// for getting telemetry response
-	CROW_ROUTE(app, "/telementry_request/").methods(HTTPMethod::Get)
+	CROW_ROUTE(app, "/telemetry_request/").methods(HTTPMethod::Get)
 		([&pktCount, &socket](const request& req, response& res) {
 			PktDef reqpkt;
 			reqpkt.SetCmd(RESPONSE);

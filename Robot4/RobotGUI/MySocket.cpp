@@ -117,6 +117,9 @@ void MySocket::ConnectTCP() {
     if (mySocket == CLIENT) {
         if (connect(ConnectionSocket, (sockaddr*)&SvrAddr, sizeof(SvrAddr)) < 0) {
             cerr << "ERROR: Failed to connect to server" << endl;
+            bTCPConnect = false;
+            cout <<"IP: "<< IPAddr<<endl;
+            cout <<"Port: "<< Port<<endl;
             return;
         }
         else {
@@ -131,6 +134,10 @@ void MySocket::ConnectTCP() {
         ConnectionSocket = accept(WelcomeSocket, (sockaddr*)&clientAddr, &clientSize);
         if (ConnectionSocket < 0) {
             cerr << "ERROR: Failed to accept connection" << endl;
+            cout <<"IP: "<< IPAddr<<endl;
+            cout <<"Port: "<< Port<<endl;
+            bTCPConnect = false;
+            return;
         }
         cout << "Client connected to SERVER TCP, data transmission ready..." << endl;
         bTCPConnect = true;
