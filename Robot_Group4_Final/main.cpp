@@ -1,5 +1,5 @@
-// CSCN72050 Final Project: Command and Control GUI 
-// Destiny Louangsombath & Tyler Dao  
+// CSCN72050 Final Project
+// Destiny Louangsombath & Tyler Dao
 
 // The RESTful routes for the Command and Control GUI 
 

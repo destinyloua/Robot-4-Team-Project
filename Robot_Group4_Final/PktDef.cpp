@@ -1,3 +1,5 @@
+// CSCN72050 Final Project: PktDef implementation
+// Destiny Louangsombath & Tyler Dao
 #include "./PktDef.h"
 #include <iostream>
 #include <bitset>

@@ -1,5 +1,7 @@
+// CSCN72050 Final Project: PktDef header
+// Destiny Louangsombath & Tyler Dao
+
 #pragma once
-// Packet definition for the term project 
 #include <memory>
 #include <iostream>
 #include <fstream>

@@ -1,4 +1,7 @@
-﻿#include "./MySocket.h"
+﻿// CSCN72050 Final Project: MySocket implementation
+// Destiny Louangsombath & Tyler Dao
+
+#include "./MySocket.h"
 #include <iostream>
 #include <cstring>
 #include <unistd.h>
@@ -135,6 +138,10 @@ void MySocket::DisconnectTCP() {
         shutdown(ConnectionSocket, SHUT_RDWR);
         close(ConnectionSocket);
         bTCPConnect = false;
+        cout << "TCP connection closed successfully" << endl;
+    }
+    else{
+        cerr << "ERROR: Socket is not connected or is UDP" << endl;
     }
 }
 

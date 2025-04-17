@@ -1,3 +1,0 @@
-/SharedDocker/Robot4/RobotGUI/CMakeFiles/CMakeScratch/TryCompile-XvWeiR/CMakeFiles/cmTC_ef127.dir
-/SharedDocker/Robot4/RobotGUI/CMakeFiles/CMakeScratch/TryCompile-XvWeiR/CMakeFiles/edit_cache.dir
-/SharedDocker/Robot4/RobotGUI/CMakeFiles/CMakeScratch/TryCompile-XvWeiR/CMakeFiles/rebuild_cache.dir

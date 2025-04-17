@@ -1,3 +1,6 @@
+// CSCN72050 Final Project: MySocket header
+// Destiny Louangsombath & Tyler Dao
+
 #pragma once
 #include <string>
 #include <netinet/in.h>  // for sockaddr_in

@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/styles/styles.css" />
 </head>
 <body>
+    <div>
     <div class="container" style="margin-top: 10px;">
         <h1>IP Address and Port Set Up</h1>
         <form onsubmit="ConnectToRobot(event)">
@@ -30,12 +31,14 @@
 
             <div style="text-align: center; margin-top: 10px;">
                 <button class="primaryBtn" id="connectBtn" type="submit">Connect</button>
-                <button class="primaryBtn"id="connectBtn" type="submit">Disconnect (TCP Only)</button>
-
             </div>
         </form>
     </div>
 
+    <div  class="container" style="margin-top: 10px; margin-bottom: 10px; text-align: center;">
+        <button class="primaryBtn" id="connectBtn" onclick="DisconnectToRobot(event)">Disconnect (TCP Only)</button>
+    </div>
+</div>
     <script src="/scripts/connect.js"></script>
 </body>
 </html>
